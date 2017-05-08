@@ -212,7 +212,6 @@ public class Player implements SliderPlayer {
 //                bestMove = currentMove;
 //            }
 //        }
-        return 0;
     }
 
     /**
