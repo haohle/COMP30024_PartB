@@ -48,6 +48,13 @@ public class Board {
 
     public void updateBoard(int x, int y, char piece) {
         this.board[x][y] = new Cell(x, y, new Piece(piece));
+
+        if (piece == 'H') {
+            this.playerHLocations.add(new Point(x, y));
+        }
+        if (piece == 'V') {
+            this.playerVLocations.add(new Point(x, y));
+        }
     }
 
    /**
