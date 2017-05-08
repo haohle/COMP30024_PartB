@@ -81,6 +81,10 @@ public class Player implements SliderPlayer {
 // alphabeta(origin, depth, -∞, +∞, TRUE)
 
 //        // hard coding of moves
+
+
+        System.out.println(generateMoves(this.p));
+        System.out.println("Number of possible moves " + numLegalMoves(this.p));
 //        if (this.p == 'H') {
 //            if (this.gameBoard.getBoard()[0][1].getPieceTypeChar() == 'H') {
 //                move = new Move(0, 1, Move.Direction.RIGHT);
@@ -141,8 +145,10 @@ public class Player implements SliderPlayer {
 
     /**
      * Calculate the number of legal moves for player
+     * THIS IS PROBABLY NOT NEEDED
+     * @param player The player that is getting its number of moves calculated
      */
-    public int numLegalMoves(char player) {
+    private int numLegalMoves(char player) {
         int num_moves = 0;
 
         if (player == 'H') {
@@ -155,7 +161,9 @@ public class Player implements SliderPlayer {
 
                 num_moves += tmpCell.getSurrounding(tmpCell.getPieceTypeChar(), this.gameBoard);
             }
-        } else if (player == 'V') {
+        }
+
+        if (player == 'V') {
             for (int i = 0; i < this.gameBoard.getPlayerVLocations().size(); i++) {
                 // retrieve piece location(s)
                 double tmpX = this.gameBoard.getPlayerVLocations().get(i).getX();
@@ -168,6 +176,67 @@ public class Player implements SliderPlayer {
         }
 
         return num_moves;
+    }
+
+    /**
+     * Get the actual surrounding possible moves
+     * @param player The player that is getting possible next moves generated
+     */
+    private List<Move> generateMoves(char player) {
+        List<Move> nextMoves = new ArrayList<Move>();   // allocate list
+
+        if (player == 'H') {
+            for (int i = 0; i < this.gameBoard.getPlayerHLocations().size(); i++) {
+                // retrieve piece location(s)
+                double tmpX = this.gameBoard.getPlayerHLocations().get(i).getX();
+                double tmpY = this.gameBoard.getPlayerHLocations().get(i).getY();
+
+                // checks above, avoids top most row
+                if (tmpY != gameBoard.getBoardSize() - 1 && !gameBoard.getBoard()[(int) tmpX][(int) tmpY + 1].isBlocked()) {
+                    nextMoves.add(new Move((int)tmpX, (int)tmpY + 1, Move.Direction.UP));
+                }
+
+                // checks right and finish line
+                if (tmpX == gameBoard.getBoardSize() - 1) {
+                    nextMoves.add(new Move((int)tmpX + 1, (int)tmpY, Move.Direction.RIGHT));
+                } else if (!gameBoard.getBoard()[(int) tmpX + 1][(int) tmpY].isBlocked()) {
+                    nextMoves.add(new Move((int)tmpX + 1, (int)tmpY, Move.Direction.RIGHT));
+                }
+
+                // checks below, avoids bottom most row
+                if (tmpY != 0 && !gameBoard.getBoard()[(int) tmpX][(int) tmpY - 1].isBlocked()) {
+                    nextMoves.add(new Move((int)tmpX, (int)tmpY - 1, Move.Direction.DOWN));
+                }
+            }
+        }
+
+        if (player == 'V') {
+            for (int i = 0; i < this.gameBoard.getPlayerVLocations().size(); i++) {
+                // retrieve piece location(s)
+                double tmpX = this.gameBoard.getPlayerVLocations().get(i).getX();
+                double tmpY = this.gameBoard.getPlayerVLocations().get(i).getY();
+
+                // checks left, avoids far left column
+                if (tmpX != 0 && !gameBoard.getBoard()[(int) tmpX - 1][(int) tmpY].isBlocked()) {
+                    nextMoves.add(new Move((int)tmpX - 1, (int)tmpY, Move.Direction.LEFT));
+                }
+
+                // checks above and finish line
+                if (tmpY == gameBoard.getBoardSize() - 1) {
+                    nextMoves.add(new Move((int)tmpX, (int)tmpY + 1, Move.Direction.UP));
+                } else if (!gameBoard.getBoard()[(int) tmpX][(int) tmpY + 1].isBlocked()) {
+                    nextMoves.add(new Move((int)tmpX, (int)tmpY + 1, Move.Direction.UP));
+                }
+
+                // checks right, avoids far right column
+                if (tmpX != gameBoard.getBoardSize() - 1
+                        && !gameBoard.getBoard()[(int) tmpX + 1][(int) tmpY].isBlocked()) {
+                    nextMoves.add(new Move((int)tmpX + 1, (int)tmpY, Move.Direction.RIGHT));
+                }
+            }
+        }
+
+        return nextMoves;
     }
 
 
