@@ -49,6 +49,10 @@ public class Cell {
         return isBlocked;
     }
 
+    public void setBlock(boolean block) {
+        this.isBlocked = block;
+    }
+
     /** 
      * Cell used for empty and blocking cells
      * @param x X Coordinate of the cell

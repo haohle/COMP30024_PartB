@@ -58,6 +58,12 @@ public class Player implements SliderPlayer {
         Move move = null;
 
         List<Move> moveList = generateMoves(this.p);
+        
+        if (moveList.size() == 0) { // no moves are possible, pass
+            System.out.println("NO MOVES POSSIBLE");
+            return null;
+        }
+
         move = moveList.get(rng.nextInt(moveList.size()));
 
 
@@ -395,9 +401,11 @@ public class Player implements SliderPlayer {
                 }
             }
 
+            // this is used to update the board and make it free at this cell
+            this.gameBoard.getBoard()[move.i][move.j].setBlock(false);
+
             return;
         }
-
         if (cell.getPieceTypeChar() == 'V' && to_j == this.d) {
             this.gameBoard.getBoard()[move.i][move.j].setPieceTypeChar('+');
             // removes point from ArrayList - used to keep track of pieces
@@ -409,19 +417,19 @@ public class Player implements SliderPlayer {
                 }
             }
 
+            // this is used to update the board and make it free at this cell
+            this.gameBoard.getBoard()[move.i][move.j].setBlock(false);
+
             return;
         }
-
-
-        System.out.println(this.gameBoard.getPlayerHLocations());
 
         // make move (not off board) - update board
         this.gameBoard.updateBoard(move.i, move.j, '+');
         this.gameBoard.updateBoard(to_i, to_j, tmpCellChar);
 
-        System.out.println(this.gameBoard.getPlayerHLocations());
-
-
+        // this is actually needed!
+        // used to update the player arrayList locations
+        // different to above because this gets called all the time, even if nothing is moving off board
         if (tmpCellChar == 'H') {
             for (Iterator<Point> it = this.gameBoard.getPlayerHLocations().iterator(); it.hasNext();) {
                 Point point = it.next();
@@ -431,11 +439,6 @@ public class Player implements SliderPlayer {
                 }
             }
         }
-
-        System.out.println(this.gameBoard.getPlayerHLocations());
-
-
-
         if (tmpCellChar == 'V') {
             for (Iterator<Point> it = this.gameBoard.getPlayerVLocations().iterator(); it.hasNext();) {
                 Point point = it.next();
