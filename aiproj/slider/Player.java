@@ -302,11 +302,21 @@ public class Player implements SliderPlayer {
         if (cell.getPieceTypeChar() == 'V' && to_j == this.d) {
             // score value of finishing off a piece?
         }
-
-
-
-
         return score;
+    }
+
+    /**
+     * reverse the original move made by reverting the board state back to what is was before
+     * @move the move that was made that now has to be reversed
+     */
+    private void reverse(Move move) {
+        int original_i = move.i, original_j = move.j;
+        switch(move.d) {
+            case UP:    original_j--; break;
+            case DOWN:  original_j++; break;
+            case RIGHT: original_i--; break;
+            case LEFT:  original_j++; break;
+        }
     }
 
     /** 
