@@ -310,13 +310,30 @@ public class Player implements SliderPlayer {
      * @move the move that was made that now has to be reversed
      */
     private void reverse(Move move) {
-        int original_i = move.i, original_j = move.j;
-        switch(move.d) {
-            case UP:    original_j--; break;
-            case DOWN:  original_j++; break;
-            case RIGHT: original_i--; break;
-            case LEFT:  original_j++; break;
+        // no move was actually made prior, so don't reverse anything
+        if (move == null) {
+            return;
         }
+
+        // original location
+        int original_i = move.i, original_j = move.j;
+
+        // where the piece/cell moved to
+        int to_i = move.i, to_j = move.j;
+        switch(move.d) {
+            case UP:    to_j++; break;
+            case DOWN:  to_j--; break;
+            case RIGHT: to_i++; break;
+            case LEFT:  to_i--; break;
+        }
+
+        // cell which needs to be reversed
+        Cell cell = this.gameBoard.getBoard()[to_i][to_j];
+        char tmpCellChar = cell.getPieceTypeChar();
+
+        // apply reversal of move
+        this.gameBoard.updateBoard(to_i, to_j, '+');
+        this.gameBoard.updateBoard(original_i, original_j, tmpCellChar);
     }
 
     /** 
