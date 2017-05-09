@@ -51,8 +51,7 @@ public class Board {
 
         if (piece == 'H') {
             this.playerHLocations.add(new Point(x, y));
-        }
-        if (piece == 'V') {
+        } else if (piece == 'V') {
             this.playerVLocations.add(new Point(x, y));
         }
     }

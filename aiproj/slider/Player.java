@@ -67,6 +67,12 @@ public class Player implements SliderPlayer {
         Move move = null;
 
         List<Move> moveList = generateMoves(this.p);
+        
+        if (moveList.size() == 0) { // no moves are possible, pass
+            System.out.println("NO MOVES POSSIBLE");
+            return null;
+        }
+
         move = moveList.get(rng.nextInt(moveList.size()));
 
 
@@ -335,9 +341,83 @@ public class Player implements SliderPlayer {
             myMobility = numLegalMoves('V', this.gameBoard);
             oppMobility = numLegalMoves('H', this.gameBoard);
         }
-        score = myMobility-oppMobility;
+        
+      // cell that is being moved away from
+        Cell cell = this.gameBoard.getBoard()[move.i][move.j];
+        char tmpCellChar = cell.getPieceTypeChar();
 
+        // cell that is being moved to
+        int to_i = move.i, to_j = move.j;
+        switch(move.d) {
+            case UP:    to_j++; break;
+            case DOWN:  to_j--; break;
+            case RIGHT: to_i++; break;
+            case LEFT:  to_i--; break;
+        }
+
+        // moving to a location which is off the board?
+        if (cell.getPieceTypeChar() == 'H' && to_i == this.d) {
+            // score value of finishing off a piece?
+        }
+        if (cell.getPieceTypeChar() == 'V' && to_j == this.d) {
+            // score value of finishing off a piece?
+        }
+        score = myMobility-oppMobility;
         return score;
+    }
+
+    /**
+     * reverse the original move made by reverting the board state back to what is was before
+     * @move the move that was made that now has to be reversed
+     */
+    private void reverse(Move move) {
+        // no move was actually made prior, so don't reverse anything
+        if (move == null) {
+            return;
+        }
+
+        // original location
+        int original_i = move.i, original_j = move.j;
+
+        // where the piece/cell moved to
+        int to_i = move.i, to_j = move.j;
+        switch(move.d) {
+            case UP:    to_j++; break;
+            case DOWN:  to_j--; break;
+            case RIGHT: to_i++; break;
+            case LEFT:  to_i--; break;
+        }
+
+        // cell which needs to be reversed
+        Cell cell = this.gameBoard.getBoard()[to_i][to_j];
+        char tmpCellChar = cell.getPieceTypeChar();
+
+        // moving to a location which is off the board?
+        if (to_i == this.d) {   // horizontal moving off
+            // reinstate it back in
+            this.gameBoard.getBoard()[original_i][original_j].setPieceTypeChar('H');
+
+            // add point back into ArrayList - used to keep track of pieces
+            this.gameBoard.getPlayerHLocations().add(new Point(original_i, original_j));
+
+            return;
+        }
+        if (to_j == this.d) {   // vertical moving off
+            // reinstate it back in
+            this.gameBoard.getBoard()[original_i][original_j].setPieceTypeChar('V');
+            
+            // add point back into ArrayList - used to keep track of pieces
+            this.gameBoard.getPlayerVLocations().add(new Point(original_i, original_j));
+
+            return;
+        }
+
+        // if here, piece did not move off the board, so instead of reinstating it,
+        // just apply reversal of move
+        this.gameBoard.updateBoard(to_i, to_j, '+');
+        this.gameBoard.updateBoard(original_i, original_j, tmpCellChar);
+
+        return;
     }
 
     /** 
@@ -376,9 +456,11 @@ public class Player implements SliderPlayer {
                 }
             }
 
+            // this is used to update the board and make it free at this cell
+            this.gameBoard.getBoard()[move.i][move.j].setBlock(false);
+
             return;
         }
-
         if (cell.getPieceTypeChar() == 'V' && to_j == this.d) {
             this.gameBoard.getBoard()[move.i][move.j].setPieceTypeChar('+');
             // removes point from ArrayList - used to keep track of pieces
@@ -390,19 +472,19 @@ public class Player implements SliderPlayer {
                 }
             }
 
+            // this is used to update the board and make it free at this cell
+            this.gameBoard.getBoard()[move.i][move.j].setBlock(false);
+
             return;
         }
-
-
-        System.out.println(this.gameBoard.getPlayerHLocations());
 
         // make move (not off board) - update board
         this.gameBoard.updateBoard(move.i, move.j, '+');
         this.gameBoard.updateBoard(to_i, to_j, tmpCellChar);
 
-        System.out.println(this.gameBoard.getPlayerHLocations());
-
-
+        // this is actually needed!
+        // used to update the player arrayList locations
+        // different to above because this gets called all the time, even if nothing is moving off board
         if (tmpCellChar == 'H') {
             for (Iterator<Point> it = this.gameBoard.getPlayerHLocations().iterator(); it.hasNext();) {
                 Point point = it.next();
@@ -412,11 +494,6 @@ public class Player implements SliderPlayer {
                 }
             }
         }
-
-        System.out.println(this.gameBoard.getPlayerHLocations());
-
-
-
         if (tmpCellChar == 'V') {
             for (Iterator<Point> it = this.gameBoard.getPlayerVLocations().iterator(); it.hasNext();) {
                 Point point = it.next();
