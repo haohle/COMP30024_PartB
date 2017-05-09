@@ -65,16 +65,29 @@ public class Player implements SliderPlayer {
 
     public Move move() {
         Move move = null;
-
+        int depth = 1;
         List<Move> moveList = generateMoves(this.p);
-        
+        System.out.println(generateMoves(this.p));
         if (moveList.size() == 0) { // no moves are possible, pass
             System.out.println("NO MOVES POSSIBLE");
             return null;
         }
 
-        move = moveList.get(rng.nextInt(moveList.size()));
-
+        int i = 0;
+        int listSize = moveList.size();
+        int max = minimax(this.gameBoard, moveList.get(i), depth-1, false);
+        move = moveList.get(i);
+        reverse(moveList.get(i));
+        i++;
+        // Return highest score of moves.
+        for(;i<listSize;i++){
+            int moveScore = minimax(this.gameBoard, moveList.get(i), depth-1, false);
+            if(moveScore > max){
+                max = moveScore;
+                move = moveList.get(i);
+                reverse(moveList.get(i));
+            }
+        }
 
 
 
@@ -116,25 +129,34 @@ public class Player implements SliderPlayer {
      * @return move
      */
     private int minimax(Board board, Move move, int depth, boolean maximizingPlayer) {
+        System.out.println("DEPTH: "+depth);
         int score = evaluateMove(move);
-
+        this.update(move);
         /*APPLY MOVE - NEED TO IMPLEMENT (ALSO NEED TO DISCUSS THE REWIND MOVE THINGO*/
 
         // Base Case 1 - Reached Specified Depth of Search
         // Base Case 2 - Reached End of Game (No player V or H locations
-        if (depth == 0 || board.getPlayerHLocations().size() == 0 || board.getPlayerVLocations().size() == 0)
+        if (depth == 0 || board.getPlayerHLocations().size() == 0 || board.getPlayerVLocations().size() == 0) {
+            System.out.println("HIT BOTTOM. Score: " + score);
             return score;
+        }
+
+        int i = 0;
+        int moveScore;
 
         if (maximizingPlayer){
-            int max = 0;
-            int i = 0;
+            int max;
             List<Move> possMoves = generateMoves(this.p);
             int listSize = possMoves.size();
-            max = minimax(board, possMoves.get(i), depth--, !maximizingPlayer);
+            System.out.println("MAX: Going to depth" + (depth-1));
+            max = minimax(board, possMoves.get(i), depth-1, !maximizingPlayer);
+            reverse(possMoves.get(i));
             i++;
             // Return highest score of moves.
             for(;i<listSize;i++){
-                int moveScore = minimax(board, possMoves.get(i), depth--, !maximizingPlayer);
+                System.out.println("MAX: Going to depth" + (depth-1));
+                moveScore = minimax(board, possMoves.get(i), depth-1, !maximizingPlayer);
+                reverse(possMoves.get(i));
                 if(moveScore > max){
                     max = moveScore;
                 }
@@ -143,14 +165,17 @@ public class Player implements SliderPlayer {
         }
         //CAN PROBABLY JUST MERGE THESE 2 BUT IM TIRED
         else{
-            int min = 0;
-            int i = 0;
-            List<Move> possMoves = generateMoves(this.p);
+            int min;
+            List<Move> possMoves = generateMoves(this.o);
             int listSize = possMoves.size();
-            min = minimax(board, possMoves.get(i), depth--, !maximizingPlayer);
+            System.out.println("MIN: Going to depth" + (depth-1));
+            min = minimax(board, possMoves.get(i), depth-1, !maximizingPlayer);
+            reverse(possMoves.get(i));
             i++;
             for(;i<listSize;i++){
-                int moveScore = minimax(board, possMoves.get(i), depth--, !maximizingPlayer);
+                System.out.println("MIN: Going to depth" + (depth-1));
+                moveScore = minimax(board, possMoves.get(i), depth-1, !maximizingPlayer);
+                reverse(possMoves.get(i));
                 if(moveScore < min){
                     min = moveScore;
                 }
