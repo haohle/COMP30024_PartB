@@ -17,7 +17,10 @@ import java.util.Random;
 public class Player implements SliderPlayer {
     private int d;
     private String b[];
+    /*Player*/
     private char p;
+    /*Opponent*/
+    private char o;
 
     private Board gameBoard;
 
@@ -27,6 +30,12 @@ public class Player implements SliderPlayer {
         this.d = dimension;
         this.b = board.split("\n");
         this.p = player;
+        if (player == 'V'){
+            this.o = 'H';
+        }
+        else{
+            this.o = 'V';
+        }
 
         this.gameBoard = new Board(dimension, this.b);
 
@@ -100,11 +109,59 @@ public class Player implements SliderPlayer {
         return move;
     }
 
+
+
     /**
      * Attempt at depth limited minimax
      * @return move
      */
-    private Move minimax(Board board, Move move, int depth, boolean maximizingPlayer) {
+    private int minimax(Board board, Move move, int depth, boolean maximizingPlayer) {
+        int score = evaluateMove(move);
+
+        /*APPLY MOVE - NEED TO IMPLEMENT (ALSO NEED TO DISCUSS THE REWIND MOVE THINGO*/
+
+        // Base Case 1 - Reached Specified Depth of Search
+        // Base Case 2 - Reached End of Game (No player V or H locations
+        if (depth == 0 || board.getPlayerHLocations().size() == 0 || board.getPlayerVLocations().size() == 0)
+            return score;
+
+        if (maximizingPlayer){
+            int max = 0;
+            int i = 0;
+            List<Move> possMoves = generateMoves(this.p);
+            int listSize = possMoves.size();
+            max = minimax(board, possMoves.get(i), depth--, !maximizingPlayer);
+            i++;
+            // Return highest score of moves.
+            for(;i<listSize;i++){
+                int moveScore = minimax(board, possMoves.get(i), depth--, !maximizingPlayer);
+                if(moveScore > max){
+                    max = moveScore;
+                }
+            }
+            return max;
+        }
+        //CAN PROBABLY JUST MERGE THESE 2 BUT IM TIRED
+        else{
+            int min = 0;
+            int i = 0;
+            List<Move> possMoves = generateMoves(this.p);
+            int listSize = possMoves.size();
+            min = minimax(board, possMoves.get(i), depth--, !maximizingPlayer);
+            i++;
+            for(;i<listSize;i++){
+                int moveScore = minimax(board, possMoves.get(i), depth--, !maximizingPlayer);
+                if(moveScore < min){
+                    min = moveScore;
+                }
+            }
+            return min;
+        }
+
+
+
+
+
 //        01 function minimax(node, depth, maximizingPlayer)
 //        02     if depth = 0 or node is a terminal node
 //        03         return the heuristic value of node
@@ -161,7 +218,6 @@ public class Player implements SliderPlayer {
 //                bestMove = currentMove;
 //            }
 //        }
-        return null;
     }
 
     /**
@@ -274,7 +330,7 @@ public class Player implements SliderPlayer {
      * @return heuristic value
      */
     private int evaluateMove(Move move) {
-        int score = 0;
+        int score;
         int myMobility = 0;
         int oppMobility = 0;
 
@@ -285,10 +341,8 @@ public class Player implements SliderPlayer {
             myMobility = numLegalMoves('V', this.gameBoard);
             oppMobility = numLegalMoves('H', this.gameBoard);
         }
-
-
-
-        // cell that is being moved away from
+        
+      // cell that is being moved away from
         Cell cell = this.gameBoard.getBoard()[move.i][move.j];
         char tmpCellChar = cell.getPieceTypeChar();
 
@@ -308,6 +362,7 @@ public class Player implements SliderPlayer {
         if (cell.getPieceTypeChar() == 'V' && to_j == this.d) {
             // score value of finishing off a piece?
         }
+        score = myMobility-oppMobility;
         return score;
     }
 
