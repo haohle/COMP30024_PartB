@@ -331,9 +331,32 @@ public class Player implements SliderPlayer {
         Cell cell = this.gameBoard.getBoard()[to_i][to_j];
         char tmpCellChar = cell.getPieceTypeChar();
 
-        // apply reversal of move
+        // moving to a location which is off the board?
+        if (to_i == this.d) {   // horizontal moving off
+            // reinstate it back in
+            this.gameBoard.getBoard()[original_i][original_j].setPieceTypeChar('H');
+
+            // add point back into ArrayList - used to keep track of pieces
+            this.gameBoard.getPlayerHLocations().add(new Point(original_i, original_j));
+
+            return;
+        }
+        if (to_j == this.d) {   // vertical moving off
+            // reinstate it back in
+            this.gameBoard.getBoard()[original_i][original_j].setPieceTypeChar('V');
+            
+            // add point back into ArrayList - used to keep track of pieces
+            this.gameBoard.getPlayerVLocations().add(new Point(original_i, original_j));
+
+            return;
+        }
+
+        // if here, piece did not move off the board, so instead of reinstating it,
+        // just apply reversal of move
         this.gameBoard.updateBoard(to_i, to_j, '+');
         this.gameBoard.updateBoard(original_i, original_j, tmpCellChar);
+
+        return;
     }
 
     /** 
