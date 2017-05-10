@@ -95,23 +95,23 @@ public class Cell {
             // checks above, avoids top most row
             if (this.yPos != gameBoard.getBoardSize() - 1  && !gameBoard.getBoard()[(int) this.xPos][(int) this.yPos + 1].isBlocked()) {
                 num_moves += 1;
-                System.out.println(this.yPos);
+                //System.out.println(this.yPos);
             }
 
             // checks right and finish line
             if (this.xPos == gameBoard.getBoardSize() - 1) {
                 num_moves += 1;
-                System.out.println(this.yPos);
+                //System.out.println(this.yPos);
             } else if (!gameBoard.getBoard()[(int) this.xPos + 1][(int) this.yPos].isBlocked()) {
                 num_moves += 1;
-                System.out.println(this.yPos);
+                //System.out.println(this.yPos);
             }
 
             // checks below, avoids bottom most row
             if (this.yPos != 0
                     && !gameBoard.getBoard()[(int) this.xPos][(int) this.yPos - 1].isBlocked()) {
                 num_moves += 1;
-                System.out.println(this.yPos);
+                //System.out.println(this.yPos);
             }
 
             return num_moves;
