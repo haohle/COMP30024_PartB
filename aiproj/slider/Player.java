@@ -442,6 +442,26 @@ public class Player implements SliderPlayer {
         this.gameBoard.updateBoard(to_i, to_j, '+');
         this.gameBoard.updateBoard(original_i, original_j, tmpCellChar);
 
+        // used to update the player arrayList locations
+        if (tmpCellChar == 'H') {
+            for (Iterator<Point> it = this.gameBoard.getPlayerHLocations().iterator(); it.hasNext();) {
+                Point point = it.next();
+                // find the point which is the one that's being moved off board
+                if (point.getX() == move.i && point.getY() == move.j) {
+                    it.remove();
+                }
+            }
+        }
+        if (tmpCellChar == 'V') {
+            for (Iterator<Point> it = this.gameBoard.getPlayerVLocations().iterator(); it.hasNext();) {
+                Point point = it.next();
+                // find the point which is the one that's being moved off board
+                if (point.getX() == move.i && point.getY() == move.j) {
+                    it.remove();
+                }
+            }
+        }
+
         return;
     }
 
