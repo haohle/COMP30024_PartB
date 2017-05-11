@@ -25,23 +25,23 @@ public class Board {
     private ArrayList<Point> playerHLocations;
     private ArrayList<Point> playerVLocations;
 
-   /**
-    * Returns an arraylist of player V piece locations
-    */
+    /**
+     * Returns an arraylist of player V piece locations
+     */
     public ArrayList<Point> getPlayerVLocations() {
         return playerVLocations;
     }
 
-   /**
-    * Returns an arraylist of player H piece locations
-    */
+    /**
+     * Returns an arraylist of player H piece locations
+     */
     public ArrayList<Point> getPlayerHLocations() {
         return playerHLocations;
     }
 
-   /**
-    * Returns the gameboard
-    */
+    /**
+     * Returns the gameboard
+     */
     public Cell[][] getBoard() {
         return board;
     }
@@ -53,21 +53,24 @@ public class Board {
             this.playerHLocations.add(new Point(x, y));
         } else if (piece == 'V') {
             this.playerVLocations.add(new Point(x, y));
+        } else {
+            // piece is +
+
         }
     }
 
-   /**
-    * Returns the gameboard's size
-    */
+    /**
+     * Returns the gameboard's size
+     */
     public Integer getBoardSize() {
         return boardSize;
     }
 
-   /**
-    * The game board
-    * @param boardSize How big the board is (board is square)
-    * @param raw The input taken of the current state of the board
-    */
+    /**
+     * The game board
+     * @param boardSize How big the board is (board is square)
+     * @param raw The input taken of the current state of the board
+     */
     public Board(int boardSize, String[] raw) {
         int i, j, x, y;
         this.boardSize = boardSize;
