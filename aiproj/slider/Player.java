@@ -68,7 +68,7 @@ public class Player implements SliderPlayer {
         MoveManager tmpMove;
         MoveManager bestMove = null;
 
-        int depth = 4; // for minimax search
+        int depth = 5; // for minimax search
 
         /* generates the possible moves the player can make at it's current state */
         this.possMoves = generateMoves(this.player);
@@ -95,6 +95,8 @@ public class Player implements SliderPlayer {
 //            if (bestMove == null) {
 //                System.out.println("MAYDAY");
 //            }
+            System.out.println(bestMove.getScore());
+            System.out.println(tmpMove.getScore());
             if (tmpMove.getScore() >= bestMove.getScore()) {
                 bestMove.setMove(v);
                 bestMove.setScore(tmpMove.getScore());
@@ -147,11 +149,13 @@ public class Player implements SliderPlayer {
             this.possMoves = generateMoves(this.player);
             System.out.println(this.possMoves);
 
+            /* no moves possible */
+            if (this.possMoves.size() == 0) {
+                return move;
+            }
+
             /* return highest score of moves.*/
             for (Move v : this.possMoves) {
-                System.out.println(this.player);
-                System.out.println(v);
-
                 tmpMove = minimax(v, d - 1, false);
                 reverse(v);
 
@@ -160,7 +164,6 @@ public class Player implements SliderPlayer {
                     maxMove = new MoveManager(v, tmpMove.getScore());
                 }
 
-//                System.out.println(maxMove.getScore());
                 if (tmpMove.getScore() >= maxMove.getScore()) {
                     maxMove.setMove(v);
                     maxMove.setScore(tmpMove.getScore());
@@ -172,11 +175,13 @@ public class Player implements SliderPlayer {
             this.oppMoves = generateMoves(this.opponent);
             System.out.println(this.oppMoves);
 
+            /* no moves possible */
+            if (this.oppMoves.size() == 0) {
+                return move;
+            }
+
             /* return lowest score of moves.*/
             for (Move v : this.oppMoves) {
-                System.out.println(this.opponent);
-                System.out.println(v);
-
                 tmpMove = minimax(v, d - 1, true);
                 reverse(v);
 
@@ -185,7 +190,6 @@ public class Player implements SliderPlayer {
                     minMove = new MoveManager(v, tmpMove.getScore());
                 }
 
-//                System.out.println(minMove.getScore());
                 if (tmpMove.getScore() <= minMove.getScore()) {
                     minMove.setMove(v);
                     minMove.setScore(tmpMove.getScore());
@@ -519,24 +523,6 @@ public class Player implements SliderPlayer {
                 to_i--;
                 break;
         }
-
-
-
-
-
-//        System.out.println("Piece: " + cell.getPieceTypeChar());
-//        System.out.println("dimension: " + this.dimension);
-//        System.out.println("to_i: " + to_i);
-//
-//        printBoard();
-//
-//
-//        System.out.println(move.i + " | " + move.j);
-//        System.out.println(this.gameBoard.getBoard()[move.i][move.j].getPieceTypeChar());
-
-
-
-
 
         /* moving to a location which is off the board? */
         if (to_i == this.dimension) {
