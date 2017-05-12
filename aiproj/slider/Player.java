@@ -68,7 +68,7 @@ public class Player implements SliderPlayer {
         MoveManager tmpMove;
         MoveManager bestMove = null;
 
-        int depth = 3; // for minimax search (currently depth 1 and 2 work, depth 3 is causing issues)
+        int depth = 4; // for minimax search
 
         /* generates the possible moves the player can make at it's current state */
         this.possMoves = generateMoves(this.player);
@@ -90,7 +90,12 @@ public class Player implements SliderPlayer {
 
             if (bestMove == null) {
                 bestMove = new MoveManager(v, tmpMove.getScore());
-            } else if (tmpMove.getScore() >= bestMove.getScore()) {
+            }
+
+//            if (bestMove == null) {
+//                System.out.println("MAYDAY");
+//            }
+            if (tmpMove.getScore() >= bestMove.getScore()) {
                 bestMove.setMove(v);
                 bestMove.setScore(tmpMove.getScore());
             }
@@ -144,6 +149,7 @@ public class Player implements SliderPlayer {
 
             /* return highest score of moves.*/
             for (Move v : this.possMoves) {
+                System.out.println(this.player);
                 System.out.println(v);
 
                 tmpMove = minimax(v, d - 1, false);
@@ -152,7 +158,10 @@ public class Player implements SliderPlayer {
                 /* no bestMove is found yet, assign first to it */
                 if (maxMove == null) {
                     maxMove = new MoveManager(v, tmpMove.getScore());
-                } else if (tmpMove.getScore() >= maxMove.getScore()) {
+                }
+
+//                System.out.println(maxMove.getScore());
+                if (tmpMove.getScore() >= maxMove.getScore()) {
                     maxMove.setMove(v);
                     maxMove.setScore(tmpMove.getScore());
                 }
@@ -165,6 +174,7 @@ public class Player implements SliderPlayer {
 
             /* return lowest score of moves.*/
             for (Move v : this.oppMoves) {
+                System.out.println(this.opponent);
                 System.out.println(v);
 
                 tmpMove = minimax(v, d - 1, true);
@@ -173,7 +183,10 @@ public class Player implements SliderPlayer {
                 /* no bestMove is found yet, assign first to it */
                 if (minMove == null) {
                     minMove = new MoveManager(v, tmpMove.getScore());
-                } else if (tmpMove.getScore() <= minMove.getScore()) {
+                }
+
+//                System.out.println(minMove.getScore());
+                if (tmpMove.getScore() <= minMove.getScore()) {
                     minMove.setMove(v);
                     minMove.setScore(tmpMove.getScore());
                 }
@@ -251,20 +264,20 @@ public class Player implements SliderPlayer {
                 double tmpY = this.gameBoard.getPlayerHLocations().get(i).getY();
 
                 /* checks above, avoids top most row */
-                if (tmpY != gameBoard.getBoardSize() - 1
-                        && !gameBoard.getBoard()[(int) tmpX][(int) tmpY + 1].isBlocked()) {
+                if (tmpY != this.gameBoard.getBoardSize() - 1
+                        && !this.gameBoard.getBoard()[(int) tmpX][(int) tmpY + 1].isBlocked()) {
                     nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.UP));
                 }
 
                 /* checks right and finish line */
-                if (tmpX == gameBoard.getBoardSize() - 1) {
+                if (tmpX == this.gameBoard.getBoardSize() - 1) {
                     nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.RIGHT));
-                } else if (!gameBoard.getBoard()[(int) tmpX + 1][(int) tmpY].isBlocked()) {
+                } else if (!this.gameBoard.getBoard()[(int) tmpX + 1][(int) tmpY].isBlocked()) {
                     nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.RIGHT));
                 }
 
                 /* checks below, avoids bottom most row */
-                if (tmpY != 0 && !gameBoard.getBoard()[(int) tmpX][(int) tmpY - 1].isBlocked()) {
+                if (tmpY != 0 && !this.gameBoard.getBoard()[(int) tmpX][(int) tmpY - 1].isBlocked()) {
                     nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.DOWN));
                 }
             }
@@ -433,17 +446,18 @@ public class Player implements SliderPlayer {
             /* add point back into ArrayList - used to keep track of pieces */
             this.gameBoard.getPlayerHLocations().add(new Point(original_i, original_j));
 
-            this.gameBoard.getBoard()[original_i][original_j].setBlock(false);
+            this.gameBoard.getBoard()[original_i][original_j].setBlock(true);
 
             return;
         }
+
         if (to_j == this.dimension) { // vertical moving off
             /* reinstate it back in */
             this.gameBoard.getBoard()[original_i][original_j].setPieceTypeChar('V');
             /* add point back into ArrayList - used to keep track of pieces */
             this.gameBoard.getPlayerVLocations().add(new Point(original_i, original_j));
 
-            this.gameBoard.getBoard()[original_i][original_j].setBlock(false);
+            this.gameBoard.getBoard()[original_i][original_j].setBlock(true);
 
             return;
         }
@@ -489,10 +503,6 @@ public class Player implements SliderPlayer {
             return;
         }
 
-        /* cell that is being moved away from */
-        Cell cell = this.gameBoard.getBoard()[move.i][move.j];
-        char tmpCellChar = cell.getPieceTypeChar();
-
         /* cell that is being moved to */
         int to_i = move.i, to_j = move.j;
         switch (move.d) {
@@ -510,8 +520,26 @@ public class Player implements SliderPlayer {
                 break;
         }
 
+
+
+
+
+//        System.out.println("Piece: " + cell.getPieceTypeChar());
+//        System.out.println("dimension: " + this.dimension);
+//        System.out.println("to_i: " + to_i);
+//
+//        printBoard();
+//
+//
+//        System.out.println(move.i + " | " + move.j);
+//        System.out.println(this.gameBoard.getBoard()[move.i][move.j].getPieceTypeChar());
+
+
+
+
+
         /* moving to a location which is off the board? */
-        if (cell.getPieceTypeChar() == 'H' && to_i == this.dimension) {
+        if (to_i == this.dimension) {
             this.gameBoard.getBoard()[move.i][move.j].setPieceTypeChar('+');
 
             /* remove point from ArrayList - used to keep track of pieces */
@@ -531,7 +559,7 @@ public class Player implements SliderPlayer {
             return;
         }
 
-        if (cell.getPieceTypeChar() == 'V' && to_j == this.dimension) {
+        if (to_j == this.dimension) {
             System.out.println("HERE " + move.i + " , " + move.j);
             this.gameBoard.getBoard()[move.i][move.j].setPieceTypeChar('+');
 
@@ -550,6 +578,10 @@ public class Player implements SliderPlayer {
 
             return;
         }
+
+        /* cell that is being moved away from */
+        Cell cell = this.gameBoard.getBoard()[move.i][move.j];
+        char tmpCellChar = cell.getPieceTypeChar();
 
         /* make move (not off board) - update board */
         this.gameBoard.updateBoard(move.i, move.j, '+');
