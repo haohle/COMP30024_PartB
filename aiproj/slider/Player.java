@@ -32,6 +32,7 @@ public class Player implements SliderPlayer {
 
     /* List of all possible makes the player can make in current state */
     private List<Move> possMoves;
+    private List<Move> oppMoves;
 
     /**
      * Initialises the player
@@ -64,81 +65,47 @@ public class Player implements SliderPlayer {
      */
     public Move move() {
 
-        int depth = 2; // for minimax search
-        int maxScore = 0, moveScore; // scores to keep track of for minimax
-        Move bestMove = null; // the optimal move the player should take
-        boolean first = true; // whether or not this is the first move being considered at depth x
+        MoveManager tmpMove;
+        MoveManager bestMove = null;
+
+        int depth = 3; // for minimax search (currently depth 1 and 2 work, depth 3 is causing issues)
 
         /* generates the possible moves the player can make at it's current state */
         this.possMoves = generateMoves(this.player);
-        System.out.println(possMoves);
+        System.out.println(this.possMoves);
+
         /* no moves are possible, pass turn */
-        if (possMoves.size() == 0) {
+        if (this.possMoves.size() == 0) {
             System.out.println("*** NO MOVES POSSIBLE, PASSING ***");
             return null;
         }
 
-        /* if only one move is possible at this current state,
-         * no reason to evaluate it, just make the move */
-        if (possMoves.size() == 1) {
-            bestMove = possMoves.get(0);
-
-            /* updates the player's internal representation of the board */
-            this.update(bestMove);
-
-            System.out.println(bestMove);
-
-            return bestMove;
-        }
-
         /* there is more than one possible move to make,
          * must evaluate which is the optimal move */
-        for (Move move : possMoves) {
-            System.out.println(move);
-            if (first) {
-                /* peek through and see what happens if player makes this move,
-                 * then reverse it to return to finish peeking */
+        for (Move v : this.possMoves) {
+            System.out.println(v);
 
-                System.out.println("INITIAL");
-                printBoard();
-                maxScore = minimax(move, depth - 1, false);
-                System.out.println("MODIFIED");
-                printBoard();
-                reverse(move);
-                System.out.println("REVERSE");
-                printBoard();
+            tmpMove = minimax(v, depth - 1, false);
+            reverse(v);
 
-                bestMove = move;
-
-                first = false;
-            } else {
-                System.out.println("INITIAL");
-                printBoard();
-                moveScore = minimax(move, depth - 1, false);
-                System.out.println("MODIFIED");
-                printBoard();
-                reverse(move);
-                System.out.println("REVERSE");
-                printBoard();
-
-
-                System.out.println(moveScore + " , " + maxScore);
-                System.out.println(bestMove);
-                System.out.println("MOVE: " + move);
-                /* found more optimal move */
-                if (moveScore > maxScore) {
-                    maxScore = moveScore; // update maxScore
-                    bestMove = move; // update bestMove
-                } else if (moveScore == maxScore) { // tie-break
-                    bestMove = move;
-                }
+            if (bestMove == null) {
+                bestMove = new MoveManager(v, tmpMove.getScore());
+            } else if (tmpMove.getScore() >= bestMove.getScore()) {
+                bestMove.setMove(v);
+                bestMove.setScore(tmpMove.getScore());
             }
         }
 
         /* updates the player's internal representation of the board */
-        this.update(bestMove);
+        printBoard();
 
-        return bestMove;
+        System.out.println("ABOUT TO PRINT");
+        System.out.println(this.player);
+        System.out.println(bestMove);
+
+        this.update(bestMove.getMove());
+
+        return bestMove.getMove();
 
     }
 
@@ -146,106 +113,74 @@ public class Player implements SliderPlayer {
      * Minimax search algorithm
      * @return int, score based on heuristic for the move player is considering
      */
-    private int minimax(Move move, int depth, boolean maximizingPlayer) {
+    private MoveManager minimax(Move m, int d, boolean mp) {
 
-        /* evaluate the move player is considering and provide a score based on a heuristic
-         * see evaluateMove for more information on the heuristic */
-        int score = evaluateMove(move);
+        System.out.println("****DEPTH " + d + "****");
 
-        if (score > 20) {
-            System.out.println(score);
-            return score;
-        }
-        int bestScore = 0, moveScore; // scores to keep track of for minimax
-        boolean first = true; // whether or not this is the first move being considered at depth x
+        MoveManager move = new MoveManager(m, evaluateMove(m));
+        MoveManager tmpMove;
+        MoveManager maxMove = null;
+        MoveManager minMove = null;
 
         /* apply move to update player's internal representation of the board */
-        this.update(move);
+        this.update(move.getMove());
+
+        if (move.getScore() > 20) {
+            System.out.println(move.getScore());
+            return move;
+        }
 
         /* Base Case 1 - Reached Specified Depth of Search
          * Base Case 2 - Reached End of Game (No player V or H pieces left) */
-        if (depth == 0 || this.gameBoard.getPlayerHLocations().size() == 0
+        if (d == 0 || this.gameBoard.getPlayerHLocations().size() == 0
                 || this.gameBoard.getPlayerVLocations().size() == 0) {
-            return score;
+            return move;
         }
 
-        if (maximizingPlayer) {
+        if (mp) {
             /* generates all possible moves for maximizing player */
             this.possMoves = generateMoves(this.player);
-            System.out.println(possMoves);
+            System.out.println(this.possMoves);
 
             /* return highest score of moves.*/
-            for (Move v : possMoves) {
+            for (Move v : this.possMoves) {
                 System.out.println(v);
-                if (first) {
-                    System.out.println("INITIAL");
-                    printBoard();
-                    bestScore = minimax(v, depth - 1, false);
-                    System.out.println("MODIFIED");
-                    printBoard();
-                    System.out.println("REVERSED");
-                    printBoard();
-                    reverse(v);
-                    first = false;
-                } else {
-                    System.out.println("INITIAL");
-                    printBoard();
-                    moveScore = minimax(v, depth - 1, false);
-                    System.out.println("MODIFIED");
-                    printBoard();
-                    reverse(v);
-                    System.out.println("REVERSED");
-                    printBoard();
 
-                    /* more optimal move has been found */
-                    if (moveScore > bestScore) {
-                        bestScore = moveScore;
-                    }
+                tmpMove = minimax(v, d - 1, false);
+                reverse(v);
+
+                /* no bestMove is found yet, assign first to it */
+                if (maxMove == null) {
+                    maxMove = new MoveManager(v, tmpMove.getScore());
+                } else if (tmpMove.getScore() >= maxMove.getScore()) {
+                    maxMove.setMove(v);
+                    maxMove.setScore(tmpMove.getScore());
                 }
             }
-
-            return bestScore;
-
+            return maxMove;
         } else {
             /* generates all possible moves for minimizing player */
-            this.possMoves = generateMoves(this.opponent);
-            System.out.println(possMoves);
+            this.oppMoves = generateMoves(this.opponent);
+            System.out.println(this.oppMoves);
 
-            /* return highest score of moves.*/
-            for (Move v : possMoves) {
+            /* return lowest score of moves.*/
+            for (Move v : this.oppMoves) {
                 System.out.println(v);
-                if (first) {
-                    System.out.println("INITIAL");
-                    printBoard();
-                    bestScore = minimax(possMoves.get(0), depth - 1, true);
-                    System.out.println("MODIFIED");
-                    printBoard();
-                    reverse(v);
-                    System.out.println("REVERSED");
-                    printBoard();
-                    first = false;
-                } else {
-                    System.out.println("INITIAL");
-                    printBoard();
-                    moveScore = minimax(v, depth - 1, true);
-                    System.out.println("MODIFIED");
-                    printBoard();
-                    reverse(v);
-                    System.out.println("REVERSED");
-                    printBoard();
 
-                    /* more optimal move has been found */
-                    if (moveScore < bestScore) {
-                        bestScore = moveScore;
-                    }
+                tmpMove = minimax(v, d - 1, true);
+                reverse(v);
+
+                /* no bestMove is found yet, assign first to it */
+                if (minMove == null) {
+                    minMove = new MoveManager(v, tmpMove.getScore());
+                } else if (tmpMove.getScore() <= minMove.getScore()) {
+                    minMove.setMove(v);
+                    minMove.setScore(tmpMove.getScore());
                 }
             }
-
-            return bestScore;
-
+            return minMove;
         }
     }
-
     // 01 function alphabeta(node, depth, α, β, maximizingPlayer)
     // 02      if depth = 0 or node is a terminal node
     // 03          return the heuristic value of node
@@ -410,7 +345,7 @@ public class Player implements SliderPlayer {
 
         if (this.player == 'H') {
             if (to_i > move.i) {
-                score += 10;
+                score += 20;
             }
             if (to_j > move.j) {
                 score += 10;
@@ -427,7 +362,7 @@ public class Player implements SliderPlayer {
                 score += 10;
             }
             if (to_j > move.j) {
-                score += 10;
+                score += 20;
             }
 //            if (to_i != 0) {
 //                if (this.gameBoard.getBoard()[to_i-1][to_j].isBlocked()){
