@@ -67,6 +67,8 @@ public class Player implements SliderPlayer {
 
         MoveManager tmpMove;
         MoveManager bestMove = null;
+        int alpha = Integer.MIN_VALUE;
+        int beta = Integer.MAX_VALUE;
 
         int depth = 5; // for minimax search
 
@@ -84,12 +86,11 @@ public class Player implements SliderPlayer {
          * must evaluate which is the optimal move */
         for (Move v : this.possMoves) {
             System.out.println(v);
-
-            tmpMove = minimax(v, depth - 1, false);
+            tmpMove = minimax(v, depth - 1, false, alpha, beta);
             reverse(v);
-
             if (bestMove == null) {
                 bestMove = new MoveManager(v, tmpMove.getScore());
+                alpha = bestMove.getScore();
             }
 
 //            if (bestMove == null) {
@@ -100,14 +101,20 @@ public class Player implements SliderPlayer {
             if (tmpMove.getScore() >= bestMove.getScore()) {
                 bestMove.setMove(v);
                 bestMove.setScore(tmpMove.getScore());
+                alpha = bestMove.getScore();
+            }
+
+            if (beta <= alpha){
+                System.out.println("BREAK EARLY" + beta + " " + alpha);
+                break;
             }
         }
 
         /* updates the player's internal representation of the board */
-        printBoard();
+        //printBoard();
 
-        System.out.println("ABOUT TO PRINT");
-        System.out.println(this.player);
+        //System.out.println("ABOUT TO PRINT");
+        //System.out.println(this.player);
         System.out.println(bestMove);
 
         this.update(bestMove.getMove());
@@ -120,7 +127,7 @@ public class Player implements SliderPlayer {
      * Minimax search algorithm
      * @return int, score based on heuristic for the move player is considering
      */
-    private MoveManager minimax(Move m, int d, boolean mp) {
+    private MoveManager minimax(Move m, int d, boolean mp, int alpha, int beta) {
 
         System.out.println("****DEPTH " + d + "****");
 
@@ -156,17 +163,23 @@ public class Player implements SliderPlayer {
 
             /* return highest score of moves.*/
             for (Move v : this.possMoves) {
-                tmpMove = minimax(v, d - 1, false);
+                /* no bestMove is found yet, assign first to it */
+                tmpMove = minimax(v, d - 1, false, alpha, beta);
                 reverse(v);
 
-                /* no bestMove is found yet, assign first to it */
                 if (maxMove == null) {
                     maxMove = new MoveManager(v, tmpMove.getScore());
+                    alpha = maxMove.getScore();
                 }
 
                 if (tmpMove.getScore() >= maxMove.getScore()) {
                     maxMove.setMove(v);
                     maxMove.setScore(tmpMove.getScore());
+                    alpha = maxMove.getScore();
+                }
+
+                if (beta <= alpha){
+                    break;
                 }
             }
             return maxMove;
@@ -182,17 +195,23 @@ public class Player implements SliderPlayer {
 
             /* return lowest score of moves.*/
             for (Move v : this.oppMoves) {
-                tmpMove = minimax(v, d - 1, true);
+                /* no bestMove is found yet, assign first to it */
+                tmpMove = minimax(v, d - 1, true, alpha, beta);
                 reverse(v);
 
-                /* no bestMove is found yet, assign first to it */
                 if (minMove == null) {
                     minMove = new MoveManager(v, tmpMove.getScore());
+                    beta = minMove.getScore();
                 }
 
                 if (tmpMove.getScore() <= minMove.getScore()) {
                     minMove.setMove(v);
                     minMove.setScore(tmpMove.getScore());
+                    beta = minMove.getScore();
+                }
+
+                if (beta <= alpha){
+                    break;
                 }
             }
             return minMove;
