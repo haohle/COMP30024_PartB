@@ -8,6 +8,7 @@
  */
 
 package aiproj.slider;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -15,239 +16,231 @@ import java.util.List;
 import java.util.Random;
 
 public class Player implements SliderPlayer {
-    private int d;
-    private String b[];
-    /*Player*/
-    private char p;
-    /*Opponent*/
-    private char o;
 
+    /* Player */
+    private char player;
+    /* Opponent */
+    private char opponent;
+
+    /* Player's internal gameboard */
+    private int dimension;
+    private String rawBoard[];
     private Board gameBoard;
 
+    /* Used for random move agent */
     private Random rng;
 
-    public void init(int dimension, String board, char player) {
-        this.d = dimension;
-        this.b = board.split("\n");
-        this.p = player;
-        if (player == 'V'){
-            this.o = 'H';
-        }
-        else{
-            this.o = 'V';
+    /* List of all possible makes the player can make in current state */
+    private List<Move> possMoves;
+    private List<Move> oppMoves;
+
+    /**
+     * Initialises the player
+     */
+    public void init(int d, String b, char p) {
+
+        this.dimension = d;
+        this.player = p;
+        this.rawBoard = b.split("\n"); // process the board for it to be read in
+
+        /* reads in and generates player's internal board */
+        this.gameBoard = new Board(this.dimension, this.rawBoard);
+
+        /* identifies who te opposing player is */
+        if (player == 'V') {
+            this.opponent = 'H';
+        } else {
+            this.opponent = 'V';
         }
 
-        this.gameBoard = new Board(dimension, this.b);
-
+        /* for random move agent */
         long seed = System.nanoTime();
         rng = new Random(seed);
-
-        /**
-         * testing purposes only, this is what the original board looks like
-         * even the referee has this, however, when the board is rendered, ref flips it
-         */
-//        for (int j = 0; j < dimension; j++) {
-//            for (int i = 0; i < dimension; i++) {
-//                System.out.print(i + "," + j + " " + test[i][j].getPieceTypeChar() + " ");
-//            }
-//            System.out.print("\n");
-//        }
-//        System.out.println("FLIPPED");
-//        // flipped version
-//        for (int j = dimension-1; j >= 0; j--) {
-//            for (int i = 0; i < dimension; i++) {
-//                System.out.print(i + "," + j + " " + test[i][j].getPieceTypeChar() + " ");
-//            }
-//            System.out.print("\n");
-//        }
-//        System.out.println("DONE");
     }
 
+    /**
+     * Dictates the move for the player, this agent makes use of the
+     * minimax (with a-b pruning) algorithm
+     * @return move
+     */
     public Move move() {
-        Move move = null;
-        int depth = 1;
-        List<Move> moveList = generateMoves(this.p);
-        System.out.println(generateMoves(this.p));
-        if (moveList.size() == 0) { // no moves are possible, pass
-            System.out.println("NO MOVES POSSIBLE");
+
+        MoveManager tmpMove;
+        MoveManager bestMove = null;
+        int alpha = Integer.MIN_VALUE;
+        int beta = Integer.MAX_VALUE;
+
+        int depth = 5; // for minimax search
+
+        /* generates the possible moves the player can make at it's current state */
+        this.possMoves = generateMoves(this.player);
+        System.out.println(this.possMoves);
+
+        /* no moves are possible, pass turn */
+        if (this.possMoves.size() == 0) {
+            System.out.println("*** NO MOVES POSSIBLE, PASSING ***");
             return null;
         }
 
-        int i = 0;
-        int listSize = moveList.size();
-        int max = minimax(this.gameBoard, moveList.get(i), depth-1, false);
-        move = moveList.get(i);
-        reverse(moveList.get(i));
-        i++;
-        // Return highest score of moves.
-        for(;i<listSize;i++){
-            int moveScore = minimax(this.gameBoard, moveList.get(i), depth-1, false);
-            if(moveScore > max){
-                max = moveScore;
-                move = moveList.get(i);
-                reverse(moveList.get(i));
+        /* there is more than one possible move to make,
+         * must evaluate which is the optimal move */
+        for (Move v : this.possMoves) {
+            System.out.println(v);
+            tmpMove = minimax(v, depth - 1, false, alpha, beta);
+            reverse(v);
+            if (bestMove == null) {
+                bestMove = new MoveManager(v, tmpMove.getScore());
+                alpha = bestMove.getScore();
+            }
+
+//            if (bestMove == null) {
+//                System.out.println("MAYDAY");
+//            }
+            System.out.println(bestMove.getScore());
+            System.out.println(tmpMove.getScore());
+            if (tmpMove.getScore() >= bestMove.getScore()) {
+                bestMove.setMove(v);
+                bestMove.setScore(tmpMove.getScore());
+                alpha = bestMove.getScore();
+            }
+
+            if (beta <= alpha){
+                System.out.println("BREAK EARLY" + beta + " " + alpha);
+                break;
             }
         }
 
+        /* updates the player's internal representation of the board */
+        //printBoard();
 
+        //System.out.println("ABOUT TO PRINT");
+        //System.out.println(this.player);
+        System.out.println(bestMove);
 
-//        (* Initial call for maximizing player *)
-//        minimax(origin, depth, TRUE)
+        this.update(bestMove.getMove());
 
+        return bestMove.getMove();
 
-
-//        // hard coding of moves
-
-
-        System.out.println(generateMoves(this.p));
-
-        System.out.println("Move " + move);
-        System.out.println("Number of possible moves " + numLegalMoves(this.p, this.gameBoard));
-//        if (this.p == 'H') {
-//            if (this.gameBoard.getBoard()[0][1].getPieceTypeChar() == 'H') {
-//                move = new Move(0, 1, Move.Direction.RIGHT);
-//            } else {
-//                move = new Move(0, 2, Move.Direction.RIGHT);
-//            }
-//        }
-    //    if (this.p == 'V') {
-//            if (this.gameBoard.getBoard()[4][0].getPieceTypeChar() == 'V') {
-//                move = new Move(4, 0, Move.Direction.UP);
-        //    } else {
-//                move = new Move(3, 0, Move.Direction.UP);
-//            }
-//        }
-//        System.out.println("MOVED");
-        this.update(move);
-        return move;
     }
-
-
 
     /**
-     * Attempt at depth limited minimax
-     * @return move
+     * Minimax search algorithm
+     * @return int, score based on heuristic for the move player is considering
      */
-    private int minimax(Board board, Move move, int depth, boolean maximizingPlayer) {
-        System.out.println("DEPTH: "+depth);
-        int score = evaluateMove(move);
-        this.update(move);
-        /*APPLY MOVE - NEED TO IMPLEMENT (ALSO NEED TO DISCUSS THE REWIND MOVE THINGO*/
+    private MoveManager minimax(Move m, int d, boolean mp, int alpha, int beta) {
 
-        // Base Case 1 - Reached Specified Depth of Search
-        // Base Case 2 - Reached End of Game (No player V or H locations
-        if (depth == 0 || board.getPlayerHLocations().size() == 0 || board.getPlayerVLocations().size() == 0) {
-            System.out.println("HIT BOTTOM. Score: " + score);
-            return score;
+        System.out.println("****DEPTH " + d + "****");
+
+        MoveManager move = new MoveManager(m, evaluateMove(m));
+        MoveManager tmpMove;
+        MoveManager maxMove = null;
+        MoveManager minMove = null;
+
+        /* apply move to update player's internal representation of the board */
+        this.update(move.getMove());
+
+        if (move.getScore() > 20) {
+            System.out.println(move.getScore());
+            return move;
         }
 
-        int i = 0;
-        int moveScore;
+        /* Base Case 1 - Reached Specified Depth of Search
+         * Base Case 2 - Reached End of Game (No player V or H pieces left) */
+        if (d == 0 || this.gameBoard.getPlayerHLocations().size() == 0
+                || this.gameBoard.getPlayerVLocations().size() == 0) {
+            return move;
+        }
 
-        if (maximizingPlayer){
-            int max;
-            List<Move> possMoves = generateMoves(this.p);
-            int listSize = possMoves.size();
-            System.out.println("MAX: Going to depth" + (depth-1));
-            max = minimax(board, possMoves.get(i), depth-1, !maximizingPlayer);
-            reverse(possMoves.get(i));
-            i++;
-            // Return highest score of moves.
-            for(;i<listSize;i++){
-                System.out.println("MAX: Going to depth" + (depth-1));
-                moveScore = minimax(board, possMoves.get(i), depth-1, !maximizingPlayer);
-                reverse(possMoves.get(i));
-                if(moveScore > max){
-                    max = moveScore;
+        if (mp) {
+            /* generates all possible moves for maximizing player */
+            this.possMoves = generateMoves(this.player);
+            System.out.println(this.possMoves);
+
+            /* no moves possible */
+            if (this.possMoves.size() == 0) {
+                return move;
+            }
+
+            /* return highest score of moves.*/
+            for (Move v : this.possMoves) {
+                /* no bestMove is found yet, assign first to it */
+                tmpMove = minimax(v, d - 1, false, alpha, beta);
+                reverse(v);
+
+                if (maxMove == null) {
+                    maxMove = new MoveManager(v, tmpMove.getScore());
+                    alpha = maxMove.getScore();
+                }
+
+                if (tmpMove.getScore() >= maxMove.getScore()) {
+                    maxMove.setMove(v);
+                    maxMove.setScore(tmpMove.getScore());
+                    alpha = maxMove.getScore();
+                }
+
+                if (beta <= alpha){
+                    break;
                 }
             }
-            return max;
-        }
-        //CAN PROBABLY JUST MERGE THESE 2 BUT IM TIRED
-        else{
-            int min;
-            List<Move> possMoves = generateMoves(this.o);
-            int listSize = possMoves.size();
-            System.out.println("MIN: Going to depth" + (depth-1));
-            min = minimax(board, possMoves.get(i), depth-1, !maximizingPlayer);
-            reverse(possMoves.get(i));
-            i++;
-            for(;i<listSize;i++){
-                System.out.println("MIN: Going to depth" + (depth-1));
-                moveScore = minimax(board, possMoves.get(i), depth-1, !maximizingPlayer);
-                reverse(possMoves.get(i));
-                if(moveScore < min){
-                    min = moveScore;
+            return maxMove;
+        } else {
+            /* generates all possible moves for minimizing player */
+            this.oppMoves = generateMoves(this.opponent);
+            System.out.println(this.oppMoves);
+
+            /* no moves possible */
+            if (this.oppMoves.size() == 0) {
+                return move;
+            }
+
+            /* return lowest score of moves.*/
+            for (Move v : this.oppMoves) {
+                /* no bestMove is found yet, assign first to it */
+                tmpMove = minimax(v, d - 1, true, alpha, beta);
+                reverse(v);
+
+                if (minMove == null) {
+                    minMove = new MoveManager(v, tmpMove.getScore());
+                    beta = minMove.getScore();
+                }
+
+                if (tmpMove.getScore() <= minMove.getScore()) {
+                    minMove.setMove(v);
+                    minMove.setScore(tmpMove.getScore());
+                    beta = minMove.getScore();
+                }
+
+                if (beta <= alpha){
+                    break;
                 }
             }
-            return min;
+            return minMove;
         }
-
-
-
-
-
-//        01 function minimax(node, depth, maximizingPlayer)
-//        02     if depth = 0 or node is a terminal node
-//        03         return the heuristic value of node
-//
-//        04     if maximizingPlayer
-//        05         bestValue := −∞
-//        06         for each child of node
-//        07             v := minimax(child, depth − 1, FALSE)
-//        08             bestValue := max(bestValue, v)
-//        09         return bestValue
-//
-//        10     else    (* minimizing player *)
-//        11         bestValue := +∞
-//        12         for each child of node
-//        13             v := minimax(child, depth − 1, TRUE)
-//        14             bestValue := min(bestValue, v)
-//        15         return bestValue
-
-        // 01 function alphabeta(node, depth, α, β, maximizingPlayer)
-// 02      if depth = 0 or node is a terminal node
-// 03          return the heuristic value of node
-// 04      if maximizingPlayer
-// 05          v := -∞
-// 06          for each child of node
-// 07              v := max(v, alphabeta(child, depth – 1, α, β, FALSE))
-// 08              α := max(α, v)
-// 09              if β ≤ α
-// 10                  break (* β cut-off *)
-// 11          return v
-// 12      else
-// 13          v := +∞
-// 14          for each child of node
-// 15              v := min(v, alphabeta(child, depth – 1, α, β, TRUE))
-// 16              β := min(β, v)
-// 17              if β ≤ α
-// 18                  break (* α cut-off *)
-// 19          return v
-// (* Initial call *)
-// alphabeta(origin, depth, -∞, +∞, TRUE)
-
-//        int bestScore;
-//        int currentScore;
-//        Move bestMove = null;
-//
-//        if (depth == 0 || move == null) {
-//            return move;
-//        }
-//
-//        if (maximizingPlayer) {
-//            Move bestMove = null;
-//            // loop through possible moves from this state
-//            currentMove = minimax(board, nextMove, depth - 1, false);
-//            if (currentMove > bestMove) {
-//                bestMove = currentMove;
-//            }
-//        }
     }
+    // 01 function alphabeta(node, depth, α, β, maximizingPlayer)
+    // 02      if depth = 0 or node is a terminal node
+    // 03          return the heuristic value of node
+    // 04      if maximizingPlayer
+    // 05          v := -∞
+    // 06          for each child of node
+    // 07              v := max(v, alphabeta(child, depth – 1, α, β, FALSE))
+    // 08              α := max(α, v)
+    // 09              if β ≤ α
+    // 10                  break (* β cut-off *)
+    // 11          return v
+    // 12      else
+    // 13          v := +∞
+    // 14          for each child of node
+    // 15              v := min(v, alphabeta(child, depth – 1, α, β, TRUE))
+    // 16              β := min(β, v)
+    // 17              if β ≤ α
+    // 18                  break (* α cut-off *)
+    // 19          return v
+    // (* Initial call *)
+    // alphabeta(origin, depth, -∞, +∞, TRUE)
 
     /**
      * Calculate the number of legal moves for player
-     * THIS IS PROBABLY NOT NEEDED
      * @param player The player that is getting its number of moves calculated
      */
     private int numLegalMoves(char player, Board board) {
@@ -255,7 +248,7 @@ public class Player implements SliderPlayer {
 
         if (player == 'H') {
             for (int i = 0; i < board.getPlayerHLocations().size(); i++) {
-                // retrieve piece location(s)
+                /* retrieve piece location(s) */
                 double tmpX = board.getPlayerHLocations().get(i).getX();
                 double tmpY = board.getPlayerHLocations().get(i).getY();
 
@@ -267,7 +260,7 @@ public class Player implements SliderPlayer {
 
         if (player == 'V') {
             for (int i = 0; i < board.getPlayerVLocations().size(); i++) {
-                // retrieve piece location(s)
+                /* retrieve piece location(s) */
                 double tmpX = board.getPlayerVLocations().get(i).getX();
                 double tmpY = board.getPlayerVLocations().get(i).getY();
 
@@ -285,63 +278,56 @@ public class Player implements SliderPlayer {
      * @param player The player that is getting possible next moves generated
      */
     private List<Move> generateMoves(char player) {
-        List<Move> nextMoves = new ArrayList<Move>();   // allocate list
+        List<Move> nextMoves = new ArrayList<Move>();
 
         if (player == 'H') {
             for (int i = 0; i < this.gameBoard.getPlayerHLocations().size(); i++) {
-                // retrieve piece location(s)
+                /* retrieve piece location(s) */
                 double tmpX = this.gameBoard.getPlayerHLocations().get(i).getX();
                 double tmpY = this.gameBoard.getPlayerHLocations().get(i).getY();
 
-                // checks above, avoids top most row
-                if (tmpY != gameBoard.getBoardSize() - 1 && !gameBoard.getBoard()[(int) tmpX][(int) tmpY + 1].isBlocked()) {
-//                    nextMoves.add(new Move((int)tmpX, (int)tmpY + 1, Move.Direction.UP));
-                    nextMoves.add(new Move((int)tmpX, (int)tmpY, Move.Direction.UP));
+                /* checks above, avoids top most row */
+                if (tmpY != this.gameBoard.getBoardSize() - 1
+                        && !this.gameBoard.getBoard()[(int) tmpX][(int) tmpY + 1].isBlocked()) {
+                    nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.UP));
                 }
 
-                // checks right and finish line
-                if (tmpX == gameBoard.getBoardSize() - 1) {
-//                    nextMoves.add(new Move((int)tmpX + 1, (int)tmpY, Move.Direction.RIGHT));
-                    nextMoves.add(new Move((int)tmpX, (int)tmpY, Move.Direction.RIGHT));
-                } else if (!gameBoard.getBoard()[(int) tmpX + 1][(int) tmpY].isBlocked()) {
-//                    nextMoves.add(new Move((int)tmpX + 1, (int)tmpY, Move.Direction.RIGHT));
-                    nextMoves.add(new Move((int)tmpX, (int)tmpY, Move.Direction.RIGHT));
+                /* checks right and finish line */
+                if (tmpX == this.gameBoard.getBoardSize() - 1) {
+                    nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.RIGHT));
+                } else if (!this.gameBoard.getBoard()[(int) tmpX + 1][(int) tmpY].isBlocked()) {
+                    nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.RIGHT));
                 }
 
-                // checks below, avoids bottom most row
-                if (tmpY != 0 && !gameBoard.getBoard()[(int) tmpX][(int) tmpY - 1].isBlocked()) {
-//                    nextMoves.add(new Move((int)tmpX, (int)tmpY - 1, Move.Direction.DOWN));
-                    nextMoves.add(new Move((int)tmpX, (int)tmpY, Move.Direction.DOWN));
+                /* checks below, avoids bottom most row */
+                if (tmpY != 0 && !this.gameBoard.getBoard()[(int) tmpX][(int) tmpY - 1].isBlocked()) {
+                    nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.DOWN));
                 }
             }
         }
 
         if (player == 'V') {
             for (int i = 0; i < this.gameBoard.getPlayerVLocations().size(); i++) {
-                // retrieve piece location(s)
+                /* retrieve piece location(s) */
                 double tmpX = this.gameBoard.getPlayerVLocations().get(i).getX();
                 double tmpY = this.gameBoard.getPlayerVLocations().get(i).getY();
 
-                // checks left, avoids far left column
+                /* checks left, avoids far left column */
                 if (tmpX != 0 && !gameBoard.getBoard()[(int) tmpX - 1][(int) tmpY].isBlocked()) {
-//                    nextMoves.add(new Move((int)tmpX - 1, (int)tmpY, Move.Direction.LEFT));
-                    nextMoves.add(new Move((int)tmpX, (int)tmpY, Move.Direction.LEFT));
+                    nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.LEFT));
                 }
 
-                // checks above and finish line
+                /* checks above and finish line */
                 if (tmpY == gameBoard.getBoardSize() - 1) {
-//                    nextMoves.add(new Move((int)tmpX, (int)tmpY + 1, Move.Direction.UP));
-                    nextMoves.add(new Move((int)tmpX, (int)tmpY, Move.Direction.UP));
+                    nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.UP));
                 } else if (!gameBoard.getBoard()[(int) tmpX][(int) tmpY + 1].isBlocked()) {
-//                    nextMoves.add(new Move((int)tmpX, (int)tmpY + 1, Move.Direction.UP));
-                    nextMoves.add(new Move((int)tmpX, (int)tmpY, Move.Direction.UP));
+                    nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.UP));
                 }
 
-                // checks right, avoids far right column
+                /* checks right, avoids far right column */
                 if (tmpX != gameBoard.getBoardSize() - 1
                         && !gameBoard.getBoard()[(int) tmpX + 1][(int) tmpY].isBlocked()) {
-//                    nextMoves.add(new Move((int)tmpX + 1, (int)tmpY, Move.Direction.RIGHT));
-                    nextMoves.add(new Move((int)tmpX, (int)tmpY, Move.Direction.RIGHT));
+                    nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.RIGHT));
                 }
             }
         }
@@ -359,181 +345,258 @@ public class Player implements SliderPlayer {
         int myMobility = 0;
         int oppMobility = 0;
 
-        if (this.p == 'H') {
+        if (this.player == 'H') {
             myMobility = numLegalMoves('H', this.gameBoard);
             oppMobility = numLegalMoves('V', this.gameBoard);
-        } else if (this.p == 'V') {
+        } else if (this.player == 'V') {
             myMobility = numLegalMoves('V', this.gameBoard);
             oppMobility = numLegalMoves('H', this.gameBoard);
         }
-        
-      // cell that is being moved away from
-        Cell cell = this.gameBoard.getBoard()[move.i][move.j];
-        char tmpCellChar = cell.getPieceTypeChar();
 
-        // cell that is being moved to
+        score = myMobility - oppMobility;
+
         int to_i = move.i, to_j = move.j;
-        switch(move.d) {
-            case UP:    to_j++; break;
-            case DOWN:  to_j--; break;
-            case RIGHT: to_i++; break;
-            case LEFT:  to_i--; break;
+        switch (move.d) {
+            case UP:
+                to_j++;
+                if (to_j == this.dimension) {
+                    score += 100;
+                    return score;
+                }
+                break;
+            case DOWN:
+                to_j--;
+                break;
+            case RIGHT:
+                to_i++;
+                if (to_i == this.dimension) {
+                    score += 100;
+                    return score;
+                }
+                break;
+            case LEFT:
+                to_i--;
+                break;
         }
 
-        // moving to a location which is off the board?
-        if (cell.getPieceTypeChar() == 'H' && to_i == this.d) {
-            // score value of finishing off a piece?
+        if (this.player == 'H') {
+            if (to_i > move.i) {
+                score += 20;
+            }
+            if (to_j > move.j) {
+                score += 10;
+            }
+//            if (to_j != 0) {
+//                if (this.gameBoard.getBoard()[to_i][to_j-1].isBlocked()){
+//                    // getting in the way of V
+//                    score += 20;
+//                }
+//            }
         }
-        if (cell.getPieceTypeChar() == 'V' && to_j == this.d) {
-            // score value of finishing off a piece?
+        if (this.player == 'V') {
+            if (to_i > move.i) {
+                score += 10;
+            }
+            if (to_j > move.j) {
+                score += 20;
+            }
+//            if (to_i != 0) {
+//                if (this.gameBoard.getBoard()[to_i-1][to_j].isBlocked()){
+//                    // getting in the way of V
+//                    score += 20;
+//                }
+//            }
         }
-        score = myMobility-oppMobility;
+
+        // cell that is being moved away from
+        // Cell cell = this.gameBoard.getBoard()[move.i][move.j];
+        // char tmpCellChar = cell.getPieceTypeChar();
+
+        // // cell that is being moved to
+        // int to_i = move.i, to_j = move.j;
+        // switch(move.d) {
+        //     case UP:    to_j++; break;
+        //     case DOWN:  to_j--; break;
+        //     case RIGHT: to_i++; break;
+        //     case LEFT:  to_i--; break;
+        // }
+
+        // // moving to a location which is off the board?
+        // if (cell.getPieceTypeChar() == 'H' && to_i == this.d) {
+        //     // score value of finishing off a piece?
+        // }
+        // if (cell.getPieceTypeChar() == 'V' && to_j == this.d) {
+        //     // score value of finishing off a piece?
+        // }
+
         return score;
     }
 
     /**
-     * reverse the original move made by reverting the board state back to what is was before
-     * @move the move that was made that now has to be reversed
+     * Reverse the original move made by reverting the board state back to what is was before
+     * @param move that was made that now has to be reversed
      */
     private void reverse(Move move) {
-        // no move was actually made prior, so don't reverse anything
+        /* no move was actually made prior, so don't reverse anything */
         if (move == null) {
             return;
         }
 
-        // original location
+        /* original location */
         int original_i = move.i, original_j = move.j;
 
-        // where the piece/cell moved to
+        /* where the piece/cell moved to */
         int to_i = move.i, to_j = move.j;
-        switch(move.d) {
-            case UP:    to_j++; break;
-            case DOWN:  to_j--; break;
-            case RIGHT: to_i++; break;
-            case LEFT:  to_i--; break;
+        switch (move.d) {
+            case UP:
+                to_j++;
+                break;
+            case DOWN:
+                to_j--;
+                break;
+            case RIGHT:
+                to_i++;
+                break;
+            case LEFT:
+                to_i--;
+                break;
         }
 
-        // cell which needs to be reversed
+        /* moved to a location which is off the board? */
+        if (to_i == this.dimension) { // horizontal moving off
+            /* reinstate it back in */
+            this.gameBoard.getBoard()[original_i][original_j].setPieceTypeChar('H');
+            /* add point back into ArrayList - used to keep track of pieces */
+            this.gameBoard.getPlayerHLocations().add(new Point(original_i, original_j));
+
+            this.gameBoard.getBoard()[original_i][original_j].setBlock(true);
+
+            return;
+        }
+
+        if (to_j == this.dimension) { // vertical moving off
+            /* reinstate it back in */
+            this.gameBoard.getBoard()[original_i][original_j].setPieceTypeChar('V');
+            /* add point back into ArrayList - used to keep track of pieces */
+            this.gameBoard.getPlayerVLocations().add(new Point(original_i, original_j));
+
+            this.gameBoard.getBoard()[original_i][original_j].setBlock(true);
+
+            return;
+        }
+
+        /* cell/piece which needs to be reversed */
         Cell cell = this.gameBoard.getBoard()[to_i][to_j];
         char tmpCellChar = cell.getPieceTypeChar();
 
-        // moving to a location which is off the board?
-        if (to_i == this.d) {   // horizontal moving off
-            // reinstate it back in
-            this.gameBoard.getBoard()[original_i][original_j].setPieceTypeChar('H');
-
-            // add point back into ArrayList - used to keep track of pieces
-            this.gameBoard.getPlayerHLocations().add(new Point(original_i, original_j));
-
-            return;
-        }
-        if (to_j == this.d) {   // vertical moving off
-            // reinstate it back in
-            this.gameBoard.getBoard()[original_i][original_j].setPieceTypeChar('V');
-            
-            // add point back into ArrayList - used to keep track of pieces
-            this.gameBoard.getPlayerVLocations().add(new Point(original_i, original_j));
-
-            return;
-        }
-
-        // if here, piece did not move off the board, so instead of reinstating it,
-        // just apply reversal of move
+        /* if here, piece did not move off the board, so instead of reinstating it,
+         * just apply reversal of move */
         this.gameBoard.updateBoard(to_i, to_j, '+');
         this.gameBoard.updateBoard(original_i, original_j, tmpCellChar);
 
-        // used to update the player arrayList locations
+        /* update the player location arrayList */
         if (tmpCellChar == 'H') {
-            for (Iterator<Point> it = this.gameBoard.getPlayerHLocations().iterator(); it.hasNext();) {
+            for (Iterator<Point> it = this.gameBoard.getPlayerHLocations().iterator(); it.hasNext(); ) {
                 Point point = it.next();
-                // find the point which is the one that's being moved off board
-                if (point.getX() == move.i && point.getY() == move.j) {
-                    it.remove();
-                }
-            }
-        }
-        if (tmpCellChar == 'V') {
-            for (Iterator<Point> it = this.gameBoard.getPlayerVLocations().iterator(); it.hasNext();) {
-                Point point = it.next();
-                // find the point which is the one that's being moved off board
-                if (point.getX() == move.i && point.getY() == move.j) {
+                /* find the point which is the one that's being moved off board */
+                if (point.getX() == to_i && point.getY() == to_j) {
                     it.remove();
                 }
             }
         }
 
-        return;
+        if (tmpCellChar == 'V') {
+            for (Iterator<Point> it = this.gameBoard.getPlayerVLocations().iterator(); it.hasNext(); ) {
+                Point point = it.next();
+                /* find the point which is the one that's being moved off board */
+                if (point.getX() == to_i && point.getY() == to_j) {
+                    it.remove();
+                }
+            }
+        }
     }
 
-    /** 
-     * if we are here, then we can assume that the previous move is already valid
-     * and has already taken place, ignore all move checking and just update the internal board
+    /**
+     * Update the player's internal board
+     * @param move that has been made
      */
     public void update(Move move) {
-        // no move was made, don't update board
+        /* no move was made, don't update board */
         if (move == null) {
             return;
         }
 
-        // cell that is being moved away from
+        /* cell that is being moved to */
+        int to_i = move.i, to_j = move.j;
+        switch (move.d) {
+            case UP:
+                to_j++;
+                break;
+            case DOWN:
+                to_j--;
+                break;
+            case RIGHT:
+                to_i++;
+                break;
+            case LEFT:
+                to_i--;
+                break;
+        }
+
+        /* moving to a location which is off the board? */
+        if (to_i == this.dimension) {
+            this.gameBoard.getBoard()[move.i][move.j].setPieceTypeChar('+');
+
+            /* remove point from ArrayList - used to keep track of pieces */
+            for (Iterator<Point> it = this.gameBoard.getPlayerHLocations().iterator(); it.hasNext();) {
+                Point point = it.next();
+                /* find the point which is the one that's being moved off board */
+                if (point.getX() == move.i && point.getY() == move.j) {
+                    it.remove();
+                }
+
+            }
+
+            /* update the board and make it free at this cell */
+            // TO DO: might not even need this
+            this.gameBoard.getBoard()[move.i][move.j].setBlock(false);
+
+            return;
+        }
+
+        if (to_j == this.dimension) {
+            System.out.println("HERE " + move.i + " , " + move.j);
+            this.gameBoard.getBoard()[move.i][move.j].setPieceTypeChar('+');
+
+            /* removes point from ArrayList - used to keep track of pieces */
+            for (Iterator<Point> it = this.gameBoard.getPlayerVLocations().iterator(); it.hasNext();) {
+                Point point = it.next();
+                /* find the point which is the one that's being moved off board */
+                if (point.getX() == move.i && point.getY() == move.j) {
+                    it.remove();
+                }
+            }
+
+            /* update the board and make it free at this cell */
+            // TO DO: might not even need this
+            this.gameBoard.getBoard()[move.i][move.j].setBlock(false);
+
+            return;
+        }
+
+        /* cell that is being moved away from */
         Cell cell = this.gameBoard.getBoard()[move.i][move.j];
         char tmpCellChar = cell.getPieceTypeChar();
 
-        // cell that is being moved to
-        int to_i = move.i, to_j = move.j;
-        switch(move.d) {
-            case UP:    to_j++; break;
-            case DOWN:  to_j--; break;
-            case RIGHT: to_i++; break;
-            case LEFT:  to_i--; break;
-        }
-
-        // moving to a location which is off the board?
-        if (cell.getPieceTypeChar() == 'H' && to_i == this.d) {
-            this.gameBoard.getBoard()[move.i][move.j].setPieceTypeChar('+');
-
-            // remove point from ArrayList - used to keep track of pieces
-            for (Iterator<Point> it = this.gameBoard.getPlayerHLocations().iterator(); it.hasNext();) {
-                Point point = it.next();
-                // find the point which is the one that's being moved off board
-                if (point.getX() == move.i && point.getY() == move.j) {
-                    it.remove();
-                }
-            }
-
-            // this is used to update the board and make it free at this cell
-            this.gameBoard.getBoard()[move.i][move.j].setBlock(false);
-
-            return;
-        }
-        if (cell.getPieceTypeChar() == 'V' && to_j == this.d) {
-            this.gameBoard.getBoard()[move.i][move.j].setPieceTypeChar('+');
-            // removes point from ArrayList - used to keep track of pieces
-            for (Iterator<Point> it = this.gameBoard.getPlayerVLocations().iterator(); it.hasNext();) {
-                Point point = it.next();
-                // find the point which is the one that's being moved off board
-                if (point.getX() == move.i && point.getY() == move.j) {
-                    it.remove();
-                }
-            }
-
-            // this is used to update the board and make it free at this cell
-            this.gameBoard.getBoard()[move.i][move.j].setBlock(false);
-
-            return;
-        }
-
-        // make move (not off board) - update board
+        /* make move (not off board) - update board */
         this.gameBoard.updateBoard(move.i, move.j, '+');
         this.gameBoard.updateBoard(to_i, to_j, tmpCellChar);
 
-        // this is actually needed!
-        // used to update the player arrayList locations
-        // different to above because this gets called all the time, even if nothing is moving off board
+        /* used to update the players memory of where pieces are currently at */
         if (tmpCellChar == 'H') {
             for (Iterator<Point> it = this.gameBoard.getPlayerHLocations().iterator(); it.hasNext();) {
                 Point point = it.next();
-                // find the point which is the one that's being moved off board
+                /* find the point which is the one that's being moved off board */
                 if (point.getX() == move.i && point.getY() == move.j) {
                     it.remove();
                 }
@@ -542,26 +605,27 @@ public class Player implements SliderPlayer {
         if (tmpCellChar == 'V') {
             for (Iterator<Point> it = this.gameBoard.getPlayerVLocations().iterator(); it.hasNext();) {
                 Point point = it.next();
-                // find the point which is the one that's being moved off board
+                /* find the point which is the one that's being moved off board */
                 if (point.getX() == move.i && point.getY() == move.j) {
                     it.remove();
                 }
             }
         }
+    }
 
+    private void printBoard() {
+        System.out.print("H: ");
+        System.out.println(this.gameBoard.getPlayerHLocations());
+        System.out.print("V: ");
+        System.out.println(this.gameBoard.getPlayerVLocations());
 
-        //        Used for testing
-//        System.out.println(this.p);
-//        Cell[][] test = this.gameBoard.getBoard();
-//        for (int j = this.d-1; j >= 0; j--) {
-//            for (int i = 0; i < this.d; i++) {
-//                System.out.print(test[i][j].getPieceTypeChar() + " ");
-//            }
-//            System.out.print("\n");
-//        }
-//        System.out.print("DONE\n");
-
-        return;
+        Cell[][] test = this.gameBoard.getBoard();
+        for (int j = this.dimension - 1; j >= 0; j--) {
+            for (int i = 0; i < this.dimension; i++) {
+                System.out.print(test[i][j].getPieceTypeChar() + " ");
+            }
+            System.out.print("\n");
+        }
     }
 
 }

@@ -14,7 +14,7 @@ public class Cell {
     private double xPos;
     private double yPos;
 
-    /** 
+    /**
      * Getter for a cell's piece type
      */
     public char getPieceTypeChar() {
@@ -42,7 +42,7 @@ public class Cell {
         this.pieceType = pieceType;
     }
 
-    /** 
+    /**
      * Getter for if a cell is blocked or not
      */
     public boolean isBlocked() {
@@ -53,7 +53,7 @@ public class Cell {
         this.isBlocked = block;
     }
 
-    /** 
+    /**
      * Cell used for empty and blocking cells
      * @param x X Coordinate of the cell
      * @param y Y Coordinate of the cell
@@ -65,7 +65,7 @@ public class Cell {
         this.yPos = y;
     }
 
-    /** 
+    /**
      * Cell used for player pieces
      * @param x X Coordinate of the cell
      * @param y Y Coordinate of the cell
@@ -83,7 +83,7 @@ public class Cell {
         }
     }
 
-    /** 
+    /**
      * Get the number of surrounding possible moves
      * @param piece The piece that is getting its surrounding pieces tested
      * @param gameBoard The gameboard in which the cell is contained within
@@ -95,23 +95,23 @@ public class Cell {
             // checks above, avoids top most row
             if (this.yPos != gameBoard.getBoardSize() - 1  && !gameBoard.getBoard()[(int) this.xPos][(int) this.yPos + 1].isBlocked()) {
                 num_moves += 1;
-                System.out.println(this.yPos);
+//                System.out.println(this.yPos);
             }
 
             // checks right and finish line
             if (this.xPos == gameBoard.getBoardSize() - 1) {
                 num_moves += 1;
-                System.out.println(this.yPos);
+//                System.out.println(this.yPos);
             } else if (!gameBoard.getBoard()[(int) this.xPos + 1][(int) this.yPos].isBlocked()) {
                 num_moves += 1;
-                System.out.println(this.yPos);
+//                System.out.println(this.yPos);
             }
 
             // checks below, avoids bottom most row
             if (this.yPos != 0
                     && !gameBoard.getBoard()[(int) this.xPos][(int) this.yPos - 1].isBlocked()) {
                 num_moves += 1;
-                System.out.println(this.yPos);
+//                System.out.println(this.yPos);
             }
 
             return num_moves;
