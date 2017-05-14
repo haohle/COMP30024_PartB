@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Collections;
 
 public class Player implements SliderPlayer {
 
@@ -70,22 +71,23 @@ public class Player implements SliderPlayer {
         int alpha = Integer.MIN_VALUE;
         int beta = Integer.MAX_VALUE;
 
-        int depth = 5; // for minimax search
+        int depth = 6; // for minimax search
 
         /* generates the possible moves the player can make at it's current state */
         this.possMoves = generateMoves(this.player);
-        System.out.println(this.possMoves);
+        Collections.sort(possMoves,new MoveListComparator());
+        //System.out.println(this.possMoves);
 
         /* no moves are possible, pass turn */
         if (this.possMoves.size() == 0) {
-            System.out.println("*** NO MOVES POSSIBLE, PASSING ***");
+            //System.out.println("*** NO MOVES POSSIBLE, PASSING ***");
             return null;
         }
 
         /* there is more than one possible move to make,
          * must evaluate which is the optimal move */
         for (Move v : this.possMoves) {
-            System.out.println(v);
+            //System.out.println(v);
             tmpMove = minimax(v, depth - 1, false, alpha, beta);
             reverse(v);
             if (bestMove == null) {
@@ -96,8 +98,8 @@ public class Player implements SliderPlayer {
 //            if (bestMove == null) {
 //                System.out.println("MAYDAY");
 //            }
-            System.out.println(bestMove.getScore());
-            System.out.println(tmpMove.getScore());
+            //System.out.println(bestMove.getScore());
+            //System.out.println(tmpMove.getScore());
             if (tmpMove.getScore() >= bestMove.getScore()) {
                 bestMove.setMove(v);
                 bestMove.setScore(tmpMove.getScore());
@@ -115,7 +117,7 @@ public class Player implements SliderPlayer {
 
         //System.out.println("ABOUT TO PRINT");
         //System.out.println(this.player);
-        System.out.println(bestMove);
+        //System.out.println(bestMove);
 
         this.update(bestMove.getMove());
 
@@ -129,7 +131,7 @@ public class Player implements SliderPlayer {
      */
     private MoveManager minimax(Move m, int d, boolean mp, int alpha, int beta) {
 
-        System.out.println("****DEPTH " + d + "****");
+        //System.out.println("****DEPTH " + d + "****");
 
         MoveManager move = new MoveManager(m, evaluateMove(m));
         MoveManager tmpMove;
@@ -140,7 +142,7 @@ public class Player implements SliderPlayer {
         this.update(move.getMove());
 
         if (move.getScore() > 20) {
-            System.out.println(move.getScore());
+            //System.out.println(move.getScore());
             return move;
         }
 
@@ -154,7 +156,8 @@ public class Player implements SliderPlayer {
         if (mp) {
             /* generates all possible moves for maximizing player */
             this.possMoves = generateMoves(this.player);
-            System.out.println(this.possMoves);
+            Collections.sort(possMoves,new MoveListComparator());
+            //System.out.println(this.possMoves);
 
             /* no moves possible */
             if (this.possMoves.size() == 0) {
@@ -186,7 +189,8 @@ public class Player implements SliderPlayer {
         } else {
             /* generates all possible moves for minimizing player */
             this.oppMoves = generateMoves(this.opponent);
-            System.out.println(this.oppMoves);
+            Collections.sort(oppMoves,new MoveListComparator());
+            //System.out.println(this.oppMoves);
 
             /* no moves possible */
             if (this.oppMoves.size() == 0) {
@@ -272,6 +276,7 @@ public class Player implements SliderPlayer {
 
         return num_moves;
     }
+
 
     /**
      * Get the actual surrounding possible moves
@@ -565,7 +570,7 @@ public class Player implements SliderPlayer {
         }
 
         if (to_j == this.dimension) {
-            System.out.println("HERE " + move.i + " , " + move.j);
+            //System.out.println("HERE " + move.i + " , " + move.j);
             this.gameBoard.getBoard()[move.i][move.j].setPieceTypeChar('+');
 
             /* removes point from ArrayList - used to keep track of pieces */
