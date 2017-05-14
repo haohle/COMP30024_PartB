@@ -71,12 +71,23 @@ public class Player implements SliderPlayer {
         int alpha = Integer.MIN_VALUE;
         int beta = Integer.MAX_VALUE;
 
-        int depth = 6; // for minimax search
+
+        int depth; // for minimax search
+
+        if (this.gameBoard.getPlayerHLocations().size() <= 2 || this.gameBoard.getPlayerVLocations().size() <= 2) {
+            depth = 9;
+        } else if (this.gameBoard.getPlayerHLocations().size() <= (this.dimension/2) || this.gameBoard.getPlayerVLocations().size() <= (this.dimension/2)) {
+            // mid game
+            depth = 6;
+        } else {
+            // while still in early stages of game
+            depth = 3;
+        }
 
         /* generates the possible moves the player can make at it's current state */
         this.possMoves = generateMoves(this.player);
         Collections.sort(possMoves,new MoveListComparator());
-        //System.out.println(this.possMoves);
+//        System.out.println(this.possMoves);
 
         /* no moves are possible, pass turn */
         if (this.possMoves.size() == 0) {
@@ -87,19 +98,14 @@ public class Player implements SliderPlayer {
         /* there is more than one possible move to make,
          * must evaluate which is the optimal move */
         for (Move v : this.possMoves) {
-            //System.out.println(v);
             tmpMove = minimax(v, depth - 1, false, alpha, beta);
             reverse(v);
+
             if (bestMove == null) {
                 bestMove = new MoveManager(v, tmpMove.getScore());
                 alpha = bestMove.getScore();
             }
 
-//            if (bestMove == null) {
-//                System.out.println("MAYDAY");
-//            }
-            //System.out.println(bestMove.getScore());
-            //System.out.println(tmpMove.getScore());
             if (tmpMove.getScore() >= bestMove.getScore()) {
                 bestMove.setMove(v);
                 bestMove.setScore(tmpMove.getScore());
@@ -117,7 +123,8 @@ public class Player implements SliderPlayer {
 
         //System.out.println("ABOUT TO PRINT");
         //System.out.println(this.player);
-        //System.out.println(bestMove);
+//        System.out.println(bestMove);
+
 
         this.update(bestMove.getMove());
 
@@ -131,7 +138,8 @@ public class Player implements SliderPlayer {
      */
     private MoveManager minimax(Move m, int d, boolean mp, int alpha, int beta) {
 
-        //System.out.println("****DEPTH " + d + "****");
+
+//        System.out.println("****DEPTH " + d + "****");
 
         MoveManager move = new MoveManager(m, evaluateMove(m));
         MoveManager tmpMove;
@@ -142,7 +150,8 @@ public class Player implements SliderPlayer {
         this.update(move.getMove());
 
         if (move.getScore() > 20) {
-            //System.out.println(move.getScore());
+
+//            System.out.println(move.getScore());
             return move;
         }
 
@@ -157,7 +166,8 @@ public class Player implements SliderPlayer {
             /* generates all possible moves for maximizing player */
             this.possMoves = generateMoves(this.player);
             Collections.sort(possMoves,new MoveListComparator());
-            //System.out.println(this.possMoves);
+
+//            System.out.println(this.possMoves);
 
             /* no moves possible */
             if (this.possMoves.size() == 0) {
@@ -189,8 +199,9 @@ public class Player implements SliderPlayer {
         } else {
             /* generates all possible moves for minimizing player */
             this.oppMoves = generateMoves(this.opponent);
+
             Collections.sort(oppMoves,new MoveListComparator());
-            //System.out.println(this.oppMoves);
+//            System.out.println(this.oppMoves);
 
             /* no moves possible */
             if (this.oppMoves.size() == 0) {
@@ -570,7 +581,7 @@ public class Player implements SliderPlayer {
         }
 
         if (to_j == this.dimension) {
-            //System.out.println("HERE " + move.i + " , " + move.j);
+//            System.out.println("HERE " + move.i + " , " + move.j);
             this.gameBoard.getBoard()[move.i][move.j].setPieceTypeChar('+');
 
             /* removes point from ArrayList - used to keep track of pieces */
