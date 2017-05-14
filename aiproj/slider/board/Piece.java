@@ -1,4 +1,4 @@
-package aiproj.slider;
+package aiproj.slider.board;
 
 /* Hao Le - leh2
  * Sam Chung - chungs1

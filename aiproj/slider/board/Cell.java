@@ -1,4 +1,4 @@
-package aiproj.slider;
+package aiproj.slider.board;
 
 /* Hao Le - leh2
  * Sam Chung - chungs1
@@ -58,7 +58,7 @@ public class Cell {
      * @param x X Coordinate of the cell
      * @param y Y Coordinate of the cell
      * @param value Whether this cell is blocked or not
-     */
+     *
     public Cell(double x, double y, boolean value) {
         this.isBlocked = value;
         this.xPos = x;

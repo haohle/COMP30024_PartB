@@ -6,7 +6,7 @@
  *
  */
 
-package aiproj.slider;
+package aiproj.slider.board;
 
 import java.awt.Point;
 import java.util.ArrayList;
@@ -47,6 +47,7 @@ public class Board {
     }
 
     public void updateBoard(int x, int y, char piece) {
+//        System.out.println(x + " , " + y);
         this.board[x][y] = new Cell(x, y, new Piece(piece));
 
         if (piece == 'H') {
@@ -55,6 +56,7 @@ public class Board {
             this.playerVLocations.add(new Point(x, y));
         } else {
             // piece is +
+
 
         }
     }

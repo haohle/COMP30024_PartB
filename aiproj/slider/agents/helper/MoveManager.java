@@ -1,4 +1,4 @@
-package aiproj.slider;
+package aiproj.slider.agents.helper;
 
 import aiproj.slider.Move;
 
