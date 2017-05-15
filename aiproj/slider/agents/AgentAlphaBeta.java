@@ -252,13 +252,21 @@ public class AgentAlphaBeta extends Agent {
             }
         }
 
+        /* want majority of our pieces in front of the opponent to mark our territory */
         if (this.player == 'H') {
             for (int i = 0; i < playerHLoc.size(); i++) {
                 for (int j = 0; j < playerVLoc.size(); j++) {
+                    /* higher importance on moving right */
                     // check if behind V's
                     if (playerHLoc.get(i).getX() < playerVLoc.get(j).getX()) {
-                        score_pos -= 1;
+                        score_pos -= 2;
                     } else { // ahead of V's
+                        score_pos += 4;
+                    }
+
+                    if (playerHLoc.get(i).getY() < playerVLoc.get(j).getY()) {
+                        score_pos -= 1;
+                    } else {
                         score_pos += 2;
                     }
                 }
@@ -266,10 +274,17 @@ public class AgentAlphaBeta extends Agent {
         } else {
             for (int i = 0; i < playerVLoc.size(); i++) {
                 for (int j = 0; j < playerHLoc.size(); j++) {
+                    /* higher importance on moving up */
                     // check if behind H's
                     if (playerVLoc.get(i).getY() < playerHLoc.get(j).getY()) {
-                        score_pos -= 1;
+                        score_pos -= 2;
                     } else { // ahead of H's
+                        score_pos += 4;
+                    }
+
+                    if (playerVLoc.get(i).getY() < playerHLoc.get(j).getY()) {
+                        score_pos -= 1;
+                    } else {
                         score_pos += 2;
                     }
                 }
