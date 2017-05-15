@@ -15,13 +15,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.awt.Point;
 
+import aiproj.slider.agents.helper.EvaluationFunctions;
 import aiproj.slider.agents.helper.MoveListComparator;
 import aiproj.slider.agents.helper.MoveManager;
 import aiproj.slider.board.Board;
 import aiproj.slider.board.Cell;
 import aiproj.slider.Move;
 import aiproj.slider.SliderPlayer;
-import aiproj.slider.agents.helper.EvaluationFunctions;
+
 
 public class AgentAlphaBeta extends Agent {
 
@@ -38,7 +39,6 @@ public class AgentAlphaBeta extends Agent {
         double alpha = Double.NEGATIVE_INFINITY;
         double beta = Double.POSITIVE_INFINITY;
 
-
         int depth; // for minimax search
 
         if (this.gameBoard.getPlayerHLocations().size() <= 2 || this.gameBoard.getPlayerVLocations().size() <= 2) {
@@ -48,7 +48,7 @@ public class AgentAlphaBeta extends Agent {
             depth = 7;
         } else {
             // while still in early stages of game
-            depth = 3;
+            depth = 5;
         }
 
         /* generates the possible moves the player can make at it's current state */
@@ -85,18 +85,9 @@ public class AgentAlphaBeta extends Agent {
             }
         }
 
-        /* updates the player's internal representation of the board */
-        //printBoard();
-
-        //System.out.println("ABOUT TO PRINT");
-        //System.out.println(this.player);
-//        System.out.println(bestMove);
-
-
         this.update(bestMove.getMove());
 
         return bestMove.getMove();
-
     }
 
     /**
@@ -104,7 +95,6 @@ public class AgentAlphaBeta extends Agent {
      * @return int, score based on heuristic for the move player is considering
      */
     private MoveManager minimax(Move m, int d, boolean mp, double alpha, double beta) {
-
 
 //        System.out.println("****DEPTH " + d + "****");
         MoveManager tmpMove;
@@ -241,18 +231,43 @@ public class AgentAlphaBeta extends Agent {
             }
         }
 
+        if (this.player == 'H') {
+            for (int i = 0; i < playerHLoc.size(); i++) {
+                for (int j = 0; j < playerVLoc.size(); j++) {
+                    // check if behind V's
+                    if (playerHLoc.get(i).getX() < playerVLoc.get(j).getX()) {
+                        score_pos -= 1;
+                    } else { // ahead of V's
+                        score_pos += 2;
+                    }
+                }
+            }
+        } else {
+            for (int i = 0; i < playerVLoc.size(); i++) {
+                for (int j = 0; j < playerHLoc.size(); j++) {
+                    // check if behind H's
+                    if (playerVLoc.get(i).getY() < playerHLoc.get(j).getY()) {
+                        score_pos -= 1;
+                    } else { // ahead of H's
+                        score_pos += 2;
+                    }
+                }
+            }
+        }
+
         //Calculates mobility of players' pieces
-        myMobility = numLegalMoves(this.player, this.gameBoard);
-        oppMobility = numLegalMoves(this.opponent, this.gameBoard);
-        score_mob = myMobility - oppMobility;
-        if (this.player == 'H'){
-            score_pos = ef.evaluatePiecePos(this.player, playerHLoc, dimension) -
-                    ef.evaluatePiecePos(this.opponent, playerVLoc, dimension);
-        }
-        else{
-            score_pos = ef.evaluatePiecePos(this.player, playerVLoc, dimension) -
-                    ef.evaluatePiecePos(this.opponent, playerVLoc, dimension);
-        }
+//        myMobility = numBlocks(this.player, this.gameBoard);
+//        oppMobility = numBlocks(this.opponent, this.gameBoard);
+//        score_mob = myMobility - oppMobility;
+
+//        if (this.player == 'H'){
+//            score_pos = ef.evaluatePiecePos(this.player, playerHLoc, dimension) -
+//                    ef.evaluatePiecePos(this.opponent, playerVLoc, dimension);
+//        } else {
+//            score_pos = ef.evaluatePiecePos(this.player, playerVLoc, dimension) -
+//                    ef.evaluatePiecePos(this.opponent, playerVLoc, dimension);
+//        }
+
         return score_mob+score_pos;
     }
 

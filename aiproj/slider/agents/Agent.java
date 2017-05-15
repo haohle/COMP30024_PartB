@@ -255,4 +255,42 @@ public class Agent implements SliderPlayer {
         return num_moves;
     }
 
+    public int numBlocks(char player, Board board) {
+        int num_blocks = 0;
+
+        if (player == 'H') {
+            for (int i = 0; i < board.getPlayerVLocations().size(); i++) {
+                double tmpX = board.getPlayerVLocations().get(i).getX();
+                double tmpY = board.getPlayerVLocations().get(i).getY();
+
+                if (tmpY == dimension - 1) {
+                    continue;
+                }
+
+                /* check to see if the piece in front of V is blocked */
+                if (board.getBoard()[(int) tmpX][(int) tmpY + 1].isBlocked()) {
+                    num_blocks += 1;
+                }
+            }
+        }
+
+        if (player == 'V') {
+            for (int i = 0; i < board.getPlayerHLocations().size(); i++) {
+                double tmpX = board.getPlayerHLocations().get(i).getX();
+                double tmpY = board.getPlayerHLocations().get(i).getY();
+
+                if (tmpX == dimension - 1) {
+                    continue;
+                }
+
+                /* check to see if the piece in front of H is blocked */
+                if (board.getBoard()[(int) tmpX + 1][(int) tmpY].isBlocked()) {
+                    num_blocks += 1;
+                }
+            }
+        }
+
+        return num_blocks;
+    }
+
 }
