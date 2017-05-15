@@ -53,7 +53,12 @@ public class AgentAlphaBeta extends Agent {
 
         /* generates the possible moves the player can make at it's current state */
         this.possMoves = generateMoves(this.player);
-        Collections.sort(possMoves,new MoveListComparator());
+        if (this.player == 'H'){
+            Collections.sort(possMoves, MoveListComparator.HComparator);
+        }
+        else{
+            Collections.sort(possMoves, MoveListComparator.VComparator);
+        }
 //        System.out.println(this.possMoves);
 
         /* no moves are possible, pass turn */
@@ -73,7 +78,7 @@ public class AgentAlphaBeta extends Agent {
                 alpha = bestMove.getScore();
             }
 
-            if (tmpMove.getScore() >= bestMove.getScore()) {
+            if (tmpMove.getScore() > bestMove.getScore()) {
                 bestMove.setMove(v);
                 bestMove.setScore(tmpMove.getScore());
                 alpha = bestMove.getScore();
@@ -120,7 +125,12 @@ public class AgentAlphaBeta extends Agent {
         if (mp) {
             /* generates all possible moves for maximizing player */
             this.possMoves = generateMoves(this.player);
-            Collections.sort(possMoves,new MoveListComparator());
+            if (this.player == 'H'){
+                Collections.sort(possMoves, MoveListComparator.HComparator);
+            }
+            else{
+                Collections.sort(possMoves, MoveListComparator.VComparator);
+            }
 
             /* no moves possible */
             if (this.possMoves.size() == 0) {
@@ -139,7 +149,7 @@ public class AgentAlphaBeta extends Agent {
                     alpha = maxMove.getScore();
                 }
 
-                if (tmpMove.getScore() >= maxMove.getScore()) {
+                if (tmpMove.getScore() > maxMove.getScore()) {
                     maxMove.setMove(v);
                     maxMove.setScore(tmpMove.getScore());
                     alpha = maxMove.getScore();
@@ -153,7 +163,12 @@ public class AgentAlphaBeta extends Agent {
         } else {
             /* generates all possible moves for minimizing player */
             this.oppMoves = generateMoves(this.opponent);
-            Collections.sort(oppMoves,new MoveListComparator());
+            if (this.player == 'H'){
+                Collections.sort(oppMoves, MoveListComparator.HComparator);
+            }
+            else{
+                Collections.sort(oppMoves, MoveListComparator.VComparator);
+            }
 
             /* no moves possible */
             if (this.oppMoves.size() == 0) {
@@ -173,7 +188,7 @@ public class AgentAlphaBeta extends Agent {
                     beta = minMove.getScore();
                 }
 
-                if (tmpMove.getScore() <= minMove.getScore()) {
+                if (tmpMove.getScore() < minMove.getScore()) {
                     minMove.setMove(v);
                     minMove.setScore(tmpMove.getScore());
                     beta = minMove.getScore();
