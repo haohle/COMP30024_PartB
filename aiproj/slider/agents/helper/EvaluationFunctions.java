@@ -25,15 +25,25 @@ public class EvaluationFunctions {
 
             if (player == 'H'){
                 //Player on the last column
-                if (x == dimension){
+                if (x == dimension-1){
                     score += x*2;
                 }
                 else{
-                    score += (x+1)*2*((y+1)/dimension);
+                    score += (y+1) + (x+1)*2;
                 }
             }
 
+            if (player == 'V'){
+                //Player on the last column
+                if (y == dimension-1){
+                    score += (y+1)*2;
+                }
+                else{
+                    score += (x+1)+(y+1)*2;
+                }
+            }
         }
+        score += (dimension-pieces.size())*10;
         return score;
     }
 }
