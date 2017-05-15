@@ -25,7 +25,7 @@ import aiproj.slider.SliderPlayer;
 
 
 public class AgentAlphaBeta extends Agent {
-
+    double halfway = dimension/2.0;
     /**
      * Dictates the move for the player, this agent makes use of the
      * minimax (with a-b pruning) algorithm
@@ -42,13 +42,13 @@ public class AgentAlphaBeta extends Agent {
         int depth; // for minimax search
 
         if (this.gameBoard.getPlayerHLocations().size() <= 2 || this.gameBoard.getPlayerVLocations().size() <= 2) {
-            depth = 9;
+            depth = 15;
         } else if (this.gameBoard.getPlayerHLocations().size() <= (this.dimension/2) || this.gameBoard.getPlayerVLocations().size() <= (this.dimension/2)) {
             // mid game
-            depth = 7;
+            depth = 8;
         } else {
             // while still in early stages of game
-            depth = 5;
+            depth = 6;
         }
 
         /* generates the possible moves the player can make at it's current state */
@@ -88,7 +88,6 @@ public class AgentAlphaBeta extends Agent {
                 break;
             }
         }
-
         this.update(bestMove.getMove());
 
         return bestMove.getMove();
@@ -124,7 +123,7 @@ public class AgentAlphaBeta extends Agent {
 
         if (mp) {
             /* generates all possible moves for maximizing player */
-            this.possMoves = generateMoves(this.player);
+            List<Move> possMoves = generateMoves(this.player);
             if (this.player == 'H'){
                 Collections.sort(possMoves, MoveListComparator.HComparator);
             }
@@ -133,13 +132,13 @@ public class AgentAlphaBeta extends Agent {
             }
 
             /* no moves possible */
-            if (this.possMoves.size() == 0) {
+            if (possMoves.size() == 0) {
                 tmpMove = minimax(null, d - 1, false, alpha, beta);
                 return tmpMove;
             }
 
             /* return highest score of moves.*/
-            for (Move v : this.possMoves) {
+            for (Move v : possMoves) {
                 /* no bestMove is found yet, assign first to it */
                 tmpMove = minimax(v, d - 1, false, alpha, beta);
                 reverse(v);
@@ -162,7 +161,7 @@ public class AgentAlphaBeta extends Agent {
             return maxMove;
         } else {
             /* generates all possible moves for minimizing player */
-            this.oppMoves = generateMoves(this.opponent);
+            List<Move> oppMoves = generateMoves(this.opponent);
             if (this.player == 'H'){
                 Collections.sort(oppMoves, MoveListComparator.HComparator);
             }
@@ -171,17 +170,17 @@ public class AgentAlphaBeta extends Agent {
             }
 
             /* no moves possible */
-            if (this.oppMoves.size() == 0) {
+            if (oppMoves.size() == 0) {
                 tmpMove = minimax(null, d - 1, true, alpha, beta);
                 return tmpMove;
             }
 
             /* return lowest score of moves.*/
-            for (Move v : this.oppMoves) {
+            for (Move v : oppMoves) {
                 /* no bestMove is found yet, assign first to it */
                 tmpMove = minimax(v, d - 1, true, alpha, beta);
                 reverse(v);
-                tmpMove.setScore(tmpMove.getScore() * -1);
+                tmpMove.setScore(tmpMove.getScore());
 
                 if (minMove == null) {
                     minMove = new MoveManager(v, tmpMove.getScore());
@@ -222,6 +221,7 @@ public class AgentAlphaBeta extends Agent {
         double score_mob = 0;
         double score_pos = 0;
         double score_pieces = 0;
+        double score_winloss = 0;
         int myMobility;
         int oppMobility;
         EvaluationFunctions ef = new EvaluationFunctions();
@@ -231,80 +231,124 @@ public class AgentAlphaBeta extends Agent {
         if (this.player == 'H'){
             //Checks the board state is a won or loss
             if (playerHLoc.size() == 0){
-                return 10000;
+                score_winloss += 10000 - playerVLoc.size();
             }
             if (playerVLoc.size() == 0){
-                return -10000;
+                score_winloss += -10000 + playerHLoc.size();
             }
 
             // player H has less pieces
-            if (playerHLoc.size() < playerVLoc.size()) {
-                score_pieces += 50;
-            } else if (playerHLoc.size() > playerVLoc.size()) {
-                // H is a bloody dissapointment
-                score_pieces -= 50;
-            } else {
-                // calc numLegalMoves here?
-            }
+//            if (playerHLoc.size() < playerVLoc.size()) {
+//                score_pieces += 50;
+//            } else if (playerHLoc.size() > playerVLoc.size()) {
+//                // H is a bloody dissapointment
+//                score_pieces -= 50;
+//            } else {
+//                // calc numLegalMoves here?
+//            }
 
         }
         if (this.player == 'V'){
             if (playerHLoc.size() == 0){
-                return -10000;
+                score_winloss += -10000 + playerVLoc.size();
             }
             if (playerVLoc.size() == 0){
-                return 10000;
+                score_winloss += 10000 - playerHLoc.size();
             }
 
             // player H has less pieces
-            if (playerVLoc.size() < playerHLoc.size()) {
-                score_pieces += 50;
-            } else if (playerVLoc.size() > playerHLoc.size()) {
-                // H is a bloody dissapointment
-                score_pieces -= 50;
-            } else {
+//            if (playerVLoc.size() < playerHLoc.size()) {
+//                score_pieces += 50;
+//            } else if (playerVLoc.size() > playerHLoc.size()) {
+//                // H is a bloody dissapointment
+//                score_pieces -= 50;
+//            } else {
                 // calc numLegalMoves here?
+//            }
+        }
+        double Hscore = 0;
+        double Vscore = 0;
+        double penaltypoints = 0;
+        boolean upperhalf = true;
+
+        for(Point p: playerHLoc){
+            Hscore += p.getX();
+            if (upperhalf && this.player == 'H' && p.getX()<halfway){
+                upperhalf = false;
             }
         }
+
+        for(Point p: playerVLoc){
+            Vscore += p.getY();
+            if (upperhalf && this.player == 'V' && p.getY()<halfway){
+                upperhalf = false;
+            }
+        }
+
+        if(this.player == 'H'){
+            //Don't forget about the H pieces which have finished
+            if (upperhalf){
+                Hscore += (dimension-playerHLoc.size())*(dimension);
+            }
+            else{
+                Hscore += (dimension-playerHLoc.size())*(dimension-2);
+            }
+
+            //Prioritise blocking their pieces over finishing
+            Vscore += (dimension-playerVLoc.size())*(dimension);
+            return score_winloss + Hscore-Vscore-penaltypoints;
+        }
+        else{
+            if (upperhalf){
+                Vscore += (dimension-playerVLoc.size())*(dimension);
+            }
+            else{
+                Vscore += (dimension-playerVLoc.size())*(dimension-2);
+            }
+            //Don't forget about the H pieces which have finished
+            Hscore += (dimension-playerHLoc.size())*(dimension);
+            return score_winloss + Vscore-Hscore-penaltypoints;
+        }
+
 
         /* want majority of our pieces in front of the opponent to mark our territory */
-        if (this.player == 'H') {
-            for (int i = 0; i < playerHLoc.size(); i++) {
-                for (int j = 0; j < playerVLoc.size(); j++) {
-                    /* higher importance on moving right */
-                    // check if behind V's
-                    if (playerHLoc.get(i).getX() < playerVLoc.get(j).getX()) {
-                        score_pos -= 2;
-                    } else { // ahead of V's
-                        score_pos += 4;
-                    }
-
-                    if (playerHLoc.get(i).getY() < playerVLoc.get(j).getY()) {
-                        score_pos -= 1;
-                    } else {
-                        score_pos += 2;
-                    }
-                }
-            }
-        } else {
-            for (int i = 0; i < playerVLoc.size(); i++) {
-                for (int j = 0; j < playerHLoc.size(); j++) {
-                    /* higher importance on moving up */
-                    // check if behind H's
-                    if (playerVLoc.get(i).getY() < playerHLoc.get(j).getY()) {
-                        score_pos -= 2;
-                    } else { // ahead of H's
-                        score_pos += 4;
-                    }
-
-                    if (playerVLoc.get(i).getY() < playerHLoc.get(j).getY()) {
-                        score_pos -= 1;
-                    } else {
-                        score_pos += 2;
-                    }
-                }
-            }
-        }
+//        if (this.player == 'H') {
+//            for (int i = 0; i < playerHLoc.size(); i++) {
+//                for (int j = 0; j < playerVLoc.size(); j++) {
+//                    /* higher importance on moving right */
+//                    // check if behind V's
+//                    if (playerHLoc.get(i).getX() < playerVLoc.get(j).getX()) {
+//                        score_pos -= 2;
+//                    } else { // ahead of V's
+//                        score_pos += 4;
+//                    }
+//
+//                    if (playerHLoc.get(i).getY() < playerVLoc.get(j).getY()) {
+//                        score_pos -= 1;
+//                    } else {
+//                        score_pos += 2;
+//                    }
+//                }
+//            }
+//        } else {
+//            for (int i = 0; i < playerVLoc.size(); i++) {
+//                for (int j = 0; j < playerHLoc.size(); j++) {
+//                    /* higher importance on moving up */
+//                    // check if behind H's
+//                    if (playerVLoc.get(i).getY() < playerHLoc.get(j).getY()) {
+//                        score_pos -= 2;
+//                    } else { // ahead of H's
+//                        score_pos += 4;
+//                    }
+//
+//                    if (playerVLoc.get(i).getY() < playerHLoc.get(j).getY()) {
+//                        score_pos -= 1;
+//                    } else {
+//                        score_pos += 2;
+//                    }
+//                }
+//            }
+//        }
 
         //Calculates mobility of players' pieces
 //        myMobility = numBlocks(this.player, this.gameBoard);
@@ -319,7 +363,7 @@ public class AgentAlphaBeta extends Agent {
 //                    ef.evaluatePiecePos(this.opponent, playerVLoc, dimension);
 //        }
 
-        return score_mob+score_pos+score_pieces;
+//        return score_mob+score_pos+score_pieces;
     }
 
     /**
