@@ -134,8 +134,6 @@ public class AgentAlphaBeta extends Agent {
             this.possMoves = generateMoves(this.player);
             Collections.sort(possMoves,new MoveListComparator());
 
-//            System.out.println(this.possMoves);
-
             /* no moves possible */
             if (this.possMoves.size() == 0) {
                 return move;
@@ -166,9 +164,8 @@ public class AgentAlphaBeta extends Agent {
         } else {
             /* generates all possible moves for minimizing player */
             this.oppMoves = generateMoves(this.opponent);
-
             Collections.sort(oppMoves,new MoveListComparator());
-//            System.out.println(this.oppMoves);
+
             /* no moves possible */
             if (this.oppMoves.size() == 0) {
                 return move;
@@ -201,12 +198,24 @@ public class AgentAlphaBeta extends Agent {
     }
 
     /**
+     * Manhattan distance - used for heuristic evaluation
+     * @param x1 end point x
+     * @param x0 start point x
+     * @param y1 end point y
+     * @param y0 start point y
+     * @return value of distance from (x0, y0) to (x1, y1)
+     */
+    private int manhattanDistance(int x1, int x0, int y1, int y0) {
+        return Math.abs(x1 - x0) + Math.abs(y1 - y0);
+    }
+
+    /**
      * The heuristic evaluation function for the current board
      * @param move the move being evaluated
      * @return heuristic value
      */
     private int evaluateMove(Move move) {
-        int score;
+        int score = 0;
         int myMobility = 0;
         int oppMobility = 0;
 
