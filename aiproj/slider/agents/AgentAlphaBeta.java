@@ -65,7 +65,7 @@ public class AgentAlphaBeta extends Agent {
         /* there is more than one possible move to make,
          * must evaluate which is the optimal move */
         for (Move v : this.possMoves) {
-            tmpMove = minimax(v, depth - 1, false, alpha, beta);
+            tmpMove = minimax(v, depth - 1, true, alpha, beta);
             reverse(v);
 
             if (bestMove == null) {
@@ -80,7 +80,6 @@ public class AgentAlphaBeta extends Agent {
             }
 
             if (beta <= alpha){
-                System.out.println("BREAK EARLY" + beta + " " + alpha);
                 break;
             }
         }
@@ -97,7 +96,7 @@ public class AgentAlphaBeta extends Agent {
     private MoveManager minimax(Move m, int d, boolean mp, double alpha, double beta) {
 
 //        System.out.println("****DEPTH " + d + "****");
-        MoveManager tmpMove;
+        MoveManager tmpMove = null;
         MoveManager maxMove = null;
         MoveManager minMove = null;
 
