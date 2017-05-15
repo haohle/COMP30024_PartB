@@ -206,20 +206,32 @@ public class AgentAlphaBeta extends Agent {
     private double evaluateMove() {
         double score_mob = 0;
         double score_pos = 0;
+        double score_pieces = 0;
         int myMobility;
         int oppMobility;
         EvaluationFunctions ef = new EvaluationFunctions();
         ArrayList<Point> playerHLoc = gameBoard.getPlayerHLocations();
         ArrayList<Point> playerVLoc = gameBoard.getPlayerVLocations();
 
-        //Checks the board state is a won or loss
         if (this.player == 'H'){
+            //Checks the board state is a won or loss
             if (playerHLoc.size() == 0){
                 return 10000;
             }
             if (playerVLoc.size() == 0){
                 return -10000;
             }
+
+            // player H has less pieces
+            if (playerHLoc.size() < playerVLoc.size()) {
+                score_pieces += 50;
+            } else if (playerHLoc.size() > playerVLoc.size()) {
+                // H is a bloody dissapointment
+                score_pieces -= 50;
+            } else {
+                // calc numLegalMoves here?
+            }
+
         }
         if (this.player == 'V'){
             if (playerHLoc.size() == 0){
@@ -227,6 +239,16 @@ public class AgentAlphaBeta extends Agent {
             }
             if (playerVLoc.size() == 0){
                 return 10000;
+            }
+
+            // player H has less pieces
+            if (playerVLoc.size() < playerHLoc.size()) {
+                score_pieces += 50;
+            } else if (playerVLoc.size() > playerHLoc.size()) {
+                // H is a bloody dissapointment
+                score_pieces -= 50;
+            } else {
+                // calc numLegalMoves here?
             }
         }
 
@@ -267,7 +289,7 @@ public class AgentAlphaBeta extends Agent {
 //                    ef.evaluatePiecePos(this.opponent, playerVLoc, dimension);
 //        }
 
-        return score_mob+score_pos;
+        return score_mob+score_pos+score_pieces;
     }
 
     /**
