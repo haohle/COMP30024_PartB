@@ -107,25 +107,24 @@ public class AgentAlphaBeta extends Agent {
 
 
 //        System.out.println("****DEPTH " + d + "****");
-
-        MoveManager move = new MoveManager(m, evaluateMove(m, mp));
         MoveManager tmpMove;
         MoveManager maxMove = null;
         MoveManager minMove = null;
 
         /* apply move to update player's internal representation of the board */
-        this.update(move.getMove());
+        this.update(m);
 
-        if (move.getScore() > 20) {
+//        if (move.getScore() > 20) {
 
 //            System.out.println(move.getScore());
-            return move;
-        }
+//            return move;
+//        }
 
         /* Base Case 1 - Reached Specified Depth of Search
          * Base Case 2 - Reached End of Game (No player V or H pieces left) */
         if (d == 0 || this.gameBoard.getPlayerHLocations().size() == 0
                 || this.gameBoard.getPlayerVLocations().size() == 0) {
+            MoveManager move = new MoveManager(m, evaluateMove());
             return move;
         }
 
@@ -136,7 +135,8 @@ public class AgentAlphaBeta extends Agent {
 
             /* no moves possible */
             if (this.possMoves.size() == 0) {
-                return move;
+                tmpMove = minimax(null, d - 1, false, alpha, beta);
+                return tmpMove;
             }
 
             /* return highest score of moves.*/
@@ -168,7 +168,8 @@ public class AgentAlphaBeta extends Agent {
 
             /* no moves possible */
             if (this.oppMoves.size() == 0) {
-                return move;
+                tmpMove = minimax(null, d - 1, true, alpha, beta);
+                return tmpMove;
             }
 
             /* return lowest score of moves.*/
@@ -211,50 +212,34 @@ public class AgentAlphaBeta extends Agent {
 
     /**
      * The heuristic evaluation function for the current board
-     * @param move the move being evaluated
      * @return heuristic value
      */
-    private int evaluateMove(Move move, boolean mp) {
+    private int evaluateMove() {
         int score = 0;
         int myMobility;
         int oppMobility;
 
+        //Checks if won or loss
+        if (gameBoard.getPlayerHLocations().size() == 0){
+            return 10000;
+        }
+        if (gameBoard.getPlayerVLocations().size() == 0){
+            return -10000;
+        }
+
+
         //Calculates mobility of players' pieces
-        //myMobility = numLegalMoves(this.player, this.gameBoard);
-        //oppMobility = numLegalMoves(this.opponent, this.gameBoard);
-        //score = myMobility - oppMobility;
+        myMobility = numLegalMoves(this.player, this.gameBoard);
+        oppMobility = numLegalMoves(this.opponent, this.gameBoard);
+        score = myMobility - oppMobility;
 
-        int to_i = move.i, to_j = move.j;
-        switch (move.d) {
-            case UP:
-                to_j++;
-                if (to_j == this.dimension) {
-                    if (mp){
-                        score += 100;
-                    }
-                    else{
-                        score -= 100;
-                    }
+        //Gives a score based on position on board
 
-                }
-                break;
-            case DOWN:
-                to_j--;
-                break;
-            case RIGHT:
-                to_i++;
-                if (to_i == this.dimension) {
-                    if (mp){
-                        score += 100;
-                    }
-                    else{
-                        score -= 100;
-                    }
-                }
-                break;
-            case LEFT:
-                to_i--;
-                break;
+        if (this.player == 'H'){
+
+        }
+        else{
+
         }
 
 
