@@ -108,7 +108,7 @@ public class AgentAlphaBeta extends Agent {
 
 //        System.out.println("****DEPTH " + d + "****");
 
-        MoveManager move = new MoveManager(m, evaluateMove(m));
+        MoveManager move = new MoveManager(m, evaluateMove(m, mp));
         MoveManager tmpMove;
         MoveManager maxMove = null;
         MoveManager minMove = null;
@@ -214,28 +214,28 @@ public class AgentAlphaBeta extends Agent {
      * @param move the move being evaluated
      * @return heuristic value
      */
-    private int evaluateMove(Move move) {
+    private int evaluateMove(Move move, boolean mp) {
         int score = 0;
-        int myMobility = 0;
-        int oppMobility = 0;
+        int myMobility;
+        int oppMobility;
 
-        if (this.player == 'H') {
-            myMobility = numLegalMoves('H', this.gameBoard);
-            oppMobility = numLegalMoves('V', this.gameBoard);
-        } else if (this.player == 'V') {
-            myMobility = numLegalMoves('V', this.gameBoard);
-            oppMobility = numLegalMoves('H', this.gameBoard);
-        }
-
-        score = myMobility - oppMobility;
+        //Calculates mobility of players' pieces
+        //myMobility = numLegalMoves(this.player, this.gameBoard);
+        //oppMobility = numLegalMoves(this.opponent, this.gameBoard);
+        //score = myMobility - oppMobility;
 
         int to_i = move.i, to_j = move.j;
         switch (move.d) {
             case UP:
                 to_j++;
                 if (to_j == this.dimension) {
-                    score += 100;
-                    return score;
+                    if (mp){
+                        score += 100;
+                    }
+                    else{
+                        score -= 100;
+                    }
+
                 }
                 break;
             case DOWN:
@@ -244,8 +244,12 @@ public class AgentAlphaBeta extends Agent {
             case RIGHT:
                 to_i++;
                 if (to_i == this.dimension) {
-                    score += 100;
-                    return score;
+                    if (mp){
+                        score += 100;
+                    }
+                    else{
+                        score -= 100;
+                    }
                 }
                 break;
             case LEFT:
@@ -253,12 +257,23 @@ public class AgentAlphaBeta extends Agent {
                 break;
         }
 
+
         if (this.player == 'H') {
             if (to_i > move.i) {
-                score += 20;
+                if (mp){
+                    score += 25;
+                }
+                else{
+                    score -= 25;
+                }
             }
             if (to_j > move.j) {
-                score += 10;
+                if (mp){
+                    score += 10;
+                }
+                else{
+                    score -= 10;
+                }
             }
 //            if (to_j != 0) {
 //                if (this.gameBoard.getBoard()[to_i][to_j-1].isBlocked()){
@@ -269,10 +284,20 @@ public class AgentAlphaBeta extends Agent {
         }
         if (this.player == 'V') {
             if (to_i > move.i) {
-                score += 10;
+                if (mp){
+                    score += 10;
+                }
+                else{
+                    score -= 10;
+                }
             }
             if (to_j > move.j) {
-                score += 20;
+                if (mp){
+                    score += 20;
+                }
+                else{
+                    score -= 20;
+                }
             }
 //            if (to_i != 0) {
 //                if (this.gameBoard.getBoard()[to_i-1][to_j].isBlocked()){
