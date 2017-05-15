@@ -15,13 +15,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.awt.Point;
 
-
 import aiproj.slider.agents.helper.MoveListComparator;
 import aiproj.slider.agents.helper.MoveManager;
 import aiproj.slider.board.Board;
 import aiproj.slider.board.Cell;
 import aiproj.slider.Move;
 import aiproj.slider.SliderPlayer;
+import aiproj.slider.agents.helper.EvaluationFunctions;
 
 public class AgentAlphaBeta extends Agent {
 
@@ -35,8 +35,8 @@ public class AgentAlphaBeta extends Agent {
 
         MoveManager tmpMove;
         MoveManager bestMove = null;
-        int alpha = Integer.MIN_VALUE;
-        int beta = Integer.MAX_VALUE;
+        double alpha = Integer.MIN_VALUE;
+        double beta = Integer.MAX_VALUE;
 
 
         int depth; // for minimax search
@@ -103,7 +103,7 @@ public class AgentAlphaBeta extends Agent {
      * Minimax search algorithm
      * @return int, score based on heuristic for the move player is considering
      */
-    private MoveManager minimax(Move m, int d, boolean mp, int alpha, int beta) {
+    private MoveManager minimax(Move m, int d, boolean mp, double alpha, double beta) {
 
 
 //        System.out.println("****DEPTH " + d + "****");
@@ -214,106 +214,46 @@ public class AgentAlphaBeta extends Agent {
      * The heuristic evaluation function for the current board
      * @return heuristic value
      */
-    private int evaluateMove() {
-        int score = 0;
+    private double evaluateMove() {
+        double score_mob = 0;
+        double score_pos = 0;
         int myMobility;
         int oppMobility;
+        EvaluationFunctions ef = new EvaluationFunctions();
+        ArrayList<Point> playerHLoc = gameBoard.getPlayerHLocations();
+        ArrayList<Point> playerVLoc = gameBoard.getPlayerVLocations();
 
-        //Checks if won or loss
-        if (gameBoard.getPlayerHLocations().size() == 0){
-            return 10000;
+        //Checks the board state is a won or loss
+        if (this.player == 'H'){
+            if (playerHLoc.size() == 0){
+                return 10000;
+            }
+            if (playerVLoc.size() == 0){
+                return -10000;
+            }
         }
-        if (gameBoard.getPlayerVLocations().size() == 0){
-            return -10000;
+        if (this.player == 'V'){
+            if (playerHLoc.size() == 0){
+                return -10000;
+            }
+            if (playerVLoc.size() == 0){
+                return 10000;
+            }
         }
-
 
         //Calculates mobility of players' pieces
         myMobility = numLegalMoves(this.player, this.gameBoard);
         oppMobility = numLegalMoves(this.opponent, this.gameBoard);
-        score = myMobility - oppMobility;
-
-        //Gives a score based on position on board
-
+        score_mob = myMobility - oppMobility;
         if (this.player == 'H'){
-
+            score_pos = ef.evaluatePiecePos(this.player, playerHLoc, dimension) -
+                    ef.evaluatePiecePos(this.opponent, playerVLoc, dimension);
         }
         else{
-
+            score_pos = ef.evaluatePiecePos(this.player, playerVLoc, dimension) -
+                    ef.evaluatePiecePos(this.opponent, playerVLoc, dimension);
         }
-
-
-        if (this.player == 'H') {
-            if (to_i > move.i) {
-                if (mp){
-                    score += 25;
-                }
-                else{
-                    score -= 25;
-                }
-            }
-            if (to_j > move.j) {
-                if (mp){
-                    score += 10;
-                }
-                else{
-                    score -= 10;
-                }
-            }
-//            if (to_j != 0) {
-//                if (this.gameBoard.getBoard()[to_i][to_j-1].isBlocked()){
-//                    // getting in the way of V
-//                    score += 20;
-//                }
-//            }
-        }
-        if (this.player == 'V') {
-            if (to_i > move.i) {
-                if (mp){
-                    score += 10;
-                }
-                else{
-                    score -= 10;
-                }
-            }
-            if (to_j > move.j) {
-                if (mp){
-                    score += 20;
-                }
-                else{
-                    score -= 20;
-                }
-            }
-//            if (to_i != 0) {
-//                if (this.gameBoard.getBoard()[to_i-1][to_j].isBlocked()){
-//                    // getting in the way of V
-//                    score += 20;
-//                }
-//            }
-        }
-
-        // cell that is being moved away from
-        // Cell cell = this.gameBoard.getBoard()[move.i][move.j];
-        // char tmpCellChar = cell.getPieceTypeChar();
-
-        // // cell that is being moved to
-        // int to_i = move.i, to_j = move.j;
-        // switch(move.d) {
-        //     case UP:    to_j++; break;
-        //     case DOWN:  to_j--; break;
-        //     case RIGHT: to_i++; break;
-        //     case LEFT:  to_i--; break;
-        // }
-
-        // // moving to a location which is off the board?
-        // if (cell.getPieceTypeChar() == 'H' && to_i == this.d) {
-        //     // score value of finishing off a piece?
-        // }
-        // if (cell.getPieceTypeChar() == 'V' && to_j == this.d) {
-        //     // score value of finishing off a piece?
-        // }
-
-        return score;
+        return score_mob+score_pos;
     }
 
     /**
