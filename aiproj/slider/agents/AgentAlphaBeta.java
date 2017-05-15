@@ -35,8 +35,8 @@ public class AgentAlphaBeta extends Agent {
 
         MoveManager tmpMove;
         MoveManager bestMove = null;
-        double alpha = Integer.MIN_VALUE;
-        double beta = Integer.MAX_VALUE;
+        double alpha = Double.NEGATIVE_INFINITY;
+        double beta = Double.POSITIVE_INFINITY;
 
 
         int depth; // for minimax search
