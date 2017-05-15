@@ -8,7 +8,7 @@ import aiproj.slider.Move;
 public class MoveManager {
 
     private Move move;
-    private int score;
+    double score;
 
     public Move getMove() {
         return move;
@@ -18,15 +18,15 @@ public class MoveManager {
         this.move = move;
     }
 
-    public int getScore() {
+    public double getScore() {
         return score;
     }
 
-    public void setScore(int score) {
+    public void setScore(double score) {
         this.score = score;
     }
 
-    public MoveManager(Move m, int s) {
+    public MoveManager(Move m, double s) {
         this.move = m;
         this.score = s;
     }
