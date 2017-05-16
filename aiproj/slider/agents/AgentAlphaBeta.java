@@ -41,8 +41,11 @@ public class AgentAlphaBeta extends Agent {
 
         int depth; // for minimax search
 
-        if (this.gameBoard.getPlayerHLocations().size() <= 2 || this.gameBoard.getPlayerVLocations().size() <= 2) {
-            depth = 15;
+        if (this.gameBoard.getPlayerHLocations().size() <= 2 && (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= 5)) {
+            depth = 10;
+        } else if (this.gameBoard.getPlayerVLocations().size() <= 2 && (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= 5)) {
+//            if here but we have much less pieces than opponent, just use a smaller depth otherwise too risky
+            depth = 10;
         } else if (this.gameBoard.getPlayerHLocations().size() <= (this.dimension/2) || this.gameBoard.getPlayerVLocations().size() <= (this.dimension/2)) {
             // mid game
             depth = 8;
@@ -88,6 +91,7 @@ public class AgentAlphaBeta extends Agent {
                 break;
             }
         }
+        System.out.println(possMoves + " " + bestMove);
         this.update(bestMove.getMove());
 
         return bestMove.getMove();
@@ -231,10 +235,10 @@ public class AgentAlphaBeta extends Agent {
         if (this.player == 'H'){
             //Checks the board state is a won or loss
             if (playerHLoc.size() == 0){
-                score_winloss += 10000 - playerVLoc.size();
+                return 10000 - (dimension-playerVLoc.size());
             }
             if (playerVLoc.size() == 0){
-                score_winloss += -10000 + playerHLoc.size();
+                return -10000 + (dimension+playerHLoc.size());
             }
 
             // player H has less pieces
@@ -270,11 +274,23 @@ public class AgentAlphaBeta extends Agent {
         double Vscore = 0;
         double penaltypoints = 0;
         boolean upperhalf = true;
+        int numpiecesinend = 0;
 
         for(Point p: playerHLoc){
             Hscore += p.getX();
             if (upperhalf && this.player == 'H' && p.getX()<halfway){
                 upperhalf = false;
+            }
+            if ((int)p.getX() == 0){
+                penaltypoints +=2;
+            }
+            //If enemy piece is on the end column
+            if((int)p.getX()==dimension-1){
+                for (Point p2: playerVLoc){
+                    if((int)p2.getX()==dimension-1){
+                        numpiecesinend++;
+                    }
+                }
             }
         }
 
@@ -283,30 +299,45 @@ public class AgentAlphaBeta extends Agent {
             if (upperhalf && this.player == 'V' && p.getY()<halfway){
                 upperhalf = false;
             }
+            if ((int)p.getY() == 0){
+                penaltypoints +=2;
+            }
         }
 
         if(this.player == 'H'){
             //Don't forget about the H pieces which have finished
             if (upperhalf){
-                Hscore += (dimension-playerHLoc.size())*(dimension);
+                if (playerHLoc.size() < dimension/2){
+                    Hscore += (dimension-playerHLoc.size())*dimension+1;
+                }
+                else{
+                    Hscore += (dimension-playerHLoc.size())*(dimension);
+                }
+
             }
             else{
                 Hscore += (dimension-playerHLoc.size())*(dimension-2);
             }
 
             //Prioritise blocking their pieces over finishing
-            Vscore += (dimension-playerVLoc.size())*(dimension);
+            Vscore += (dimension-playerVLoc.size())*(dimension+5);
             return score_winloss + Hscore-Vscore-penaltypoints;
         }
         else{
             if (upperhalf){
-                Vscore += (dimension-playerVLoc.size())*(dimension);
+                if (playerVLoc.size() < dimension/2){
+                    Vscore += (dimension-playerVLoc.size())*dimension+1;
+                }
+                else{
+                    Vscore += (dimension-playerVLoc.size())*(dimension);
+                }
+
             }
             else{
                 Vscore += (dimension-playerVLoc.size())*(dimension-2);
             }
             //Don't forget about the H pieces which have finished
-            Hscore += (dimension-playerHLoc.size())*(dimension);
+            Hscore += (dimension-playerHLoc.size())*(dimension+5);
             return score_winloss + Vscore-Hscore-penaltypoints;
         }
 
