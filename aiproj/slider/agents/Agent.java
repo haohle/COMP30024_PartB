@@ -47,7 +47,6 @@ public class Agent implements SliderPlayer {
         }
     }
 
-    @Override
     public Move move() {
 
         return null;
@@ -150,56 +149,56 @@ public class Agent implements SliderPlayer {
      * Get the actual surrounding possible moves
      * @param player The player that is getting possible next moves generated
      */
-    public List<Move> generateMoves(char player) {
+    public List<Move> generateMoves(char player, Board b) {
         List<Move> nextMoves = new ArrayList<>();
 
         if (player == 'H') {
-            for (int i = 0; i < this.gameBoard.getPlayerHLocations().size(); i++) {
+            for (int i = 0; i < b.getPlayerHLocations().size(); i++) {
                 /* retrieve piece location(s) */
-                double tmpX = this.gameBoard.getPlayerHLocations().get(i).getX();
-                double tmpY = this.gameBoard.getPlayerHLocations().get(i).getY();
+                double tmpX = b.getPlayerHLocations().get(i).getX();
+                double tmpY = b.getPlayerHLocations().get(i).getY();
 
                 /* checks above, avoids top most row */
-                if (tmpY != this.gameBoard.getBoardSize() - 1
-                        && !this.gameBoard.getBoard()[(int) tmpX][(int) tmpY + 1].isBlocked()) {
+                if (tmpY != b.getBoardSize() - 1
+                        && !b.getBoard()[(int) tmpX][(int) tmpY + 1].isBlocked()) {
                     nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.UP));
                 }
 
                 /* checks right and finish line */
-                if (tmpX == this.gameBoard.getBoardSize() - 1) {
+                if (tmpX == b.getBoardSize() - 1) {
                     nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.RIGHT));
-                } else if (!this.gameBoard.getBoard()[(int) tmpX + 1][(int) tmpY].isBlocked()) {
+                } else if (!b.getBoard()[(int) tmpX + 1][(int) tmpY].isBlocked()) {
                     nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.RIGHT));
                 }
 
                 /* checks below, avoids bottom most row */
-                if (tmpY != 0 && !this.gameBoard.getBoard()[(int) tmpX][(int) tmpY - 1].isBlocked()) {
+                if (tmpY != 0 && !b.getBoard()[(int) tmpX][(int) tmpY - 1].isBlocked()) {
                     nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.DOWN));
                 }
             }
         }
 
         if (player == 'V') {
-            for (int i = 0; i < this.gameBoard.getPlayerVLocations().size(); i++) {
+            for (int i = 0; i < b.getPlayerVLocations().size(); i++) {
                 /* retrieve piece location(s) */
-                double tmpX = this.gameBoard.getPlayerVLocations().get(i).getX();
-                double tmpY = this.gameBoard.getPlayerVLocations().get(i).getY();
+                double tmpX = b.getPlayerVLocations().get(i).getX();
+                double tmpY = b.getPlayerVLocations().get(i).getY();
 
                 /* checks left, avoids far left column */
-                if (tmpX != 0 && !gameBoard.getBoard()[(int) tmpX - 1][(int) tmpY].isBlocked()) {
+                if (tmpX != 0 && !b.getBoard()[(int) tmpX - 1][(int) tmpY].isBlocked()) {
                     nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.LEFT));
                 }
 
                 /* checks above and finish line */
-                if (tmpY == gameBoard.getBoardSize() - 1) {
+                if (tmpY == b.getBoardSize() - 1) {
                     nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.UP));
-                } else if (!gameBoard.getBoard()[(int) tmpX][(int) tmpY + 1].isBlocked()) {
+                } else if (!b.getBoard()[(int) tmpX][(int) tmpY + 1].isBlocked()) {
                     nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.UP));
                 }
 
                 /* checks right, avoids far right column */
-                if (tmpX != gameBoard.getBoardSize() - 1
-                        && !gameBoard.getBoard()[(int) tmpX + 1][(int) tmpY].isBlocked()) {
+                if (tmpX != b.getBoardSize() - 1
+                        && !b.getBoard()[(int) tmpX + 1][(int) tmpY].isBlocked()) {
                     nextMoves.add(new Move((int) tmpX, (int) tmpY, Move.Direction.RIGHT));
                 }
             }
