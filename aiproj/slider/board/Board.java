@@ -51,15 +51,12 @@ public class Board implements Cloneable {
     }
 
     public void updateBoard(int x, int y, char piece) {
-//        System.out.println(x + " , " + y);
         this.board[x][y] = new Cell(x, y, new Piece(piece));
 
         if (piece == 'H') {
             this.playerHLocations.add(new Point(x, y));
         } else if (piece == 'V') {
             this.playerVLocations.add(new Point(x, y));
-        } else {
-            // piece is +
         }
     }
 
@@ -82,34 +79,26 @@ public class Board implements Cloneable {
         playerHLocations = new ArrayList<Point>(boardSize);
         playerVLocations = new ArrayList<Point>(boardSize);
 
-//       for (i = 0; i < boardSize; i++) {
 
         y = 0;
         for (i = boardSize-1; i != -1; i--) {
             x = 0;
-//            System.out.println("TEST");
-//            System.out.println(raw[i]);
-//            System.out.println("TEST");
 
             for (j = 0; j < raw[i].length(); j += 2) {
-//                System.out.print(x + "," + y + " ");
                 if (raw[i].charAt(j) == BLOCK) {
                     // implement block cell
                     board[x][y] = new Cell(x, y, new Piece(raw[i].charAt(j)));
                 } else if (raw[i].charAt(j) == EMPTY) {
                     // implement empty cell
                     board[x][y] = new Cell(x, y, new Piece(raw[i].charAt(j)));
-//                    System.out.print(raw[i].charAt(j));
                 } else if (raw[i].charAt(j) == VERT || raw[i].charAt(j) == HORI) {
                     // implement new piece
                     board[x][y] = new Cell(x, y, new Piece(raw[i].charAt(j)));
 
                     // implement piece location vectors
                     if (raw[i].charAt(j) == VERT) {
-//                        System.out.print("V ");
                         playerVLocations.add(new Point(x, y));
                     } else {
-//                        System.out.print("H ");
                         playerHLocations.add(new Point(x, y));
                     }
                 } else {
@@ -118,20 +107,16 @@ public class Board implements Cloneable {
                     System.exit(0);
                 }
                 x++;
-//                System.out.print("\n");
             }
-
-//
-//            System.out.println("Verify");
-//            for (int k = 0; k < boardSize; k++) {
-//                System.out.print(k + "," + y);
-//                System.out.print(board[k][y].getPieceTypeChar() + " ");
-//            }
-//            System.out.print("\n");
             y++;
         }
     }
 
+    /**
+     * Updates the board state by applying the provided move
+     * @param b, Board state
+     * @param move, Move to be applied to the board
+     */
     public void update(Board b, Move move) {
         /* no move was made, don't update board */
         if (move == null) {
@@ -177,7 +162,6 @@ public class Board implements Cloneable {
         }
 
         if (to_j == b.boardSize) {
-//            System.out.println("HERE " + move.i + " , " + move.j);
             b.getBoard()[move.i][move.j].setPieceTypeChar('+');
 
             /* removes point from ArrayList - used to keep track of pieces */
@@ -225,7 +209,10 @@ public class Board implements Cloneable {
         }
     }
 
-    /** Enumeration of all of the possible states of a board position */
+    /**
+     * Outputs the current board state to a string
+     * This is primarily used for Monte Carlo when a copy of the board is needed
+     */
     public String toString(){
         StringBuilder s = new StringBuilder(2 * boardSize * boardSize);
         for (int j = boardSize-1; j >= 0; j--) {
@@ -239,6 +226,11 @@ public class Board implements Cloneable {
         return s.toString();
     }
 
+
+    /**
+     * Outputs the board provided in the param
+     * @param b, Board which is to be printed
+     */
     public void printB(Board b) {
         System.out.print("H: ");
         System.out.println(b.getPlayerHLocations());
