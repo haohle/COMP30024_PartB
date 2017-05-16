@@ -2,6 +2,7 @@ package aiproj.slider.agents;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class Agent implements SliderPlayer {
     /* List of all possible makes the player can make in current state */
     protected List<Move> possMoves;
     protected List<Move> oppMoves;
+    protected HashMap hm = new HashMap();
 
     public void init(int d, String b, char p) {
         this.dimension = d;
