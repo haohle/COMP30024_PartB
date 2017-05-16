@@ -32,6 +32,7 @@ Describe approach
     Evaluation weighting changes as the game progresses (Halfway point, 3/4 point)
     (this is judged by the positioning of your pieces). It weights the number of finished pieces of each player
     differently at each stage to encourage blocking and allow our pieces to progress down the board.
+    Punishes pieces progressively, (more when pieces are closer to start)
 
 - Creative techniques
     - search strategy optimization
