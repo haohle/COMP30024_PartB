@@ -13,16 +13,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.HashMap;
 import java.awt.Point;
 
-import aiproj.slider.agents.helper.EvaluationFunctions;
 import aiproj.slider.agents.helper.MoveListComparator;
 import aiproj.slider.agents.helper.MoveManager;
-import aiproj.slider.board.Board;
 import aiproj.slider.board.Cell;
 import aiproj.slider.Move;
-import aiproj.slider.SliderPlayer;
 
 
 public class AgentAlphaBeta extends Agent {
@@ -92,8 +88,8 @@ public class AgentAlphaBeta extends Agent {
             }
         }
         System.out.println(possMoves + " " + bestMove);
-        hm.put(bestMove,
         this.update(bestMove.getMove());
+        hm.put(gameBoard.toString(),1);
         return bestMove.getMove();
     }
 
@@ -110,6 +106,11 @@ public class AgentAlphaBeta extends Agent {
 
         /* apply move to update player's internal representation of the board */
         this.update(m);
+
+        if (hm.containsKey(gameBoard.toString())){
+            MoveManager move = new MoveManager(m, -20000);
+            return move;
+        };
 
 //        if (move.getScore() > 20) {
 
@@ -226,10 +227,7 @@ public class AgentAlphaBeta extends Agent {
         double Vscore = 0;
         double score_winloss = 0;
         double penaltypoints = 0;
-        boolean upperhalf = true;
-        int numpiecesinend = 0;
 
-        EvaluationFunctions ef = new EvaluationFunctions();
         ArrayList<Point> playerHLoc = gameBoard.getPlayerHLocations();
         ArrayList<Point> playerVLoc = gameBoard.getPlayerVLocations();
 
