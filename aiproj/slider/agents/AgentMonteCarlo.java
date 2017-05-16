@@ -1,7 +1,6 @@
 package aiproj.slider.agents;
 
 import aiproj.slider.Move;
-import aiproj.slider.agents.helper.MoveManager;
 import aiproj.slider.board.Board;
 
 import java.util.List;
@@ -81,7 +80,6 @@ public class AgentMonteCarlo extends Agent {
                     if (hTurn) {
                         if (first && player == 'H') {
                             tempBoard.update(tempBoard, m);
-                            tempBoard.printB(tempBoard);
                             first = false;
                         } else {
                             // simulation
@@ -98,7 +96,6 @@ public class AgentMonteCarlo extends Agent {
                             move = hMoves.get(rng.nextInt(hMoves.size()));
 
                             tempBoard.update(tempBoard, move);
-                            tempBoard.printB(tempBoard);
                         }
 
                         if (tempBoard.getPlayerHLocations().size() == 0) { // no more remaining, game over
@@ -112,7 +109,6 @@ public class AgentMonteCarlo extends Agent {
                     } else {
                         if (first && player == 'V') {
                             tempBoard.update(tempBoard, m);
-                            tempBoard.printB(tempBoard);
                             first = false;
                         } else {
                             vMoves = generateMoves('V', tempBoard);
@@ -128,7 +124,6 @@ public class AgentMonteCarlo extends Agent {
                             move = vMoves.get(rng.nextInt(vMoves.size()));
 
                             tempBoard.update(tempBoard, move);
-                            tempBoard.printB(tempBoard);
 
                         }
 
