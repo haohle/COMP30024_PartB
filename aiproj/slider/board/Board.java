@@ -50,10 +50,6 @@ public class Board implements Cloneable {
         return board;
     }
 
-    public void setBoard(Board b) {
-        System.out.println(b);
-    }
-
     public void updateBoard(int x, int y, char piece) {
 //        System.out.println(x + " , " + y);
         this.board[x][y] = new Cell(x, y, new Piece(piece));
