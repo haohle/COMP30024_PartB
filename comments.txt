@@ -1,0 +1,48 @@
+=============
+Hao Le - leh2
+Sam Chung - chungs1
+============
+Project Part B: Comments
+============
+
+Structure
+*agent
+**agent (abstract class)
+**agentalphabeta
+**agentrandom (for testing purposes)
+
+*board (used to build the player's internal board representation)
+**board
+**cell
+**piece
+
+*move
+*referee
+*sliderplayer
+
+3rd Party Java Libraries
+N/A - nothing is used
+
+Describe approach
+- Search strategy
+    minimax
+- Evaluation function
+
+- Creative techniques
+    - search strategy optimization
+        a-b pruning
+        varying early, mid and end game stages
+            *heuristic weighting and depth of minimax varies depending on the stages
+    - game-specific heuristics
+
+    - specialised data structure
+        N/A
+    - code optimisations
+        sorted possible moves with a strong preference on:
+            moving right then up (for H)
+            moving up then right (for V)
+            *this helps with a-b pruning to reduce the amount of nodes expanded
+        rather than generating new board states for each minimax node, we only use one board
+        and update it at each node, then reverse it back to its original state when we backpropagate
+    - search algorithms not discussed in class
+        considered doing monte carlo
