@@ -43,7 +43,7 @@ public class AgentMonteCarlo extends Agent {
 
     public Move getMove(char player, Board b) {
         this.tempBoard = new Board(this.dimension, b.toString().split("\n"));
-        bestMove = null;    // what's being returned
+        bestMove = null;    // move being returned
         bestScore = 0;
 
         boolean hTurn;
@@ -79,17 +79,13 @@ public class AgentMonteCarlo extends Agent {
                 // while no one has won yet
                 while (simulate) {
                     if (hTurn) {
-                        System.out.println("##### H TURN #####");
                         if (first && player == 'H') {
                             tempBoard.update(tempBoard, m);
-                            System.out.println(tempBoard.getPlayerHLocations());
                             tempBoard.printB(tempBoard);
                             first = false;
                         } else {
                             // simulation
                             hMoves = generateMoves('H', tempBoard);
-                            System.out.println(hMoves);
-                            System.out.println(tempBoard.getPlayerHLocations());
 
                             // check if no moves possible
                             if (hMoves.size() == 0) {
@@ -100,10 +96,8 @@ public class AgentMonteCarlo extends Agent {
                             }
 
                             move = hMoves.get(rng.nextInt(hMoves.size()));
-                            System.out.println(move);
 
                             tempBoard.update(tempBoard, move);
-                            System.out.println(tempBoard.getPlayerHLocations());
                             tempBoard.printB(tempBoard);
                         }
 
@@ -111,22 +105,17 @@ public class AgentMonteCarlo extends Agent {
                             if (player == 'H') {
                                 wins += 1;
                             }
-                            System.out.println("Here H");
                             simulate = false;
                         }
 
                         hTurn = false;
                     } else {
-                        System.out.println("##### V TURN #####");
                         if (first && player == 'V') {
                             tempBoard.update(tempBoard, m);
-                            System.out.println(tempBoard.getPlayerVLocations());
                             tempBoard.printB(tempBoard);
                             first = false;
                         } else {
                             vMoves = generateMoves('V', tempBoard);
-                            System.out.println(vMoves);
-                            System.out.println(tempBoard.getPlayerVLocations());
 
                             // check if no moves possible
                             if (vMoves.size() == 0) {
@@ -137,10 +126,8 @@ public class AgentMonteCarlo extends Agent {
                             }
 
                             move = vMoves.get(rng.nextInt(vMoves.size()));
-                            System.out.println(move);
 
                             tempBoard.update(tempBoard, move);
-                            System.out.println(tempBoard.getPlayerVLocations());
                             tempBoard.printB(tempBoard);
 
                         }
@@ -149,17 +136,15 @@ public class AgentMonteCarlo extends Agent {
                             if (player == 'V') {
                                 wins += 1;
                             }
-                            System.out.println("Here H");
                             simulate = false;
                         }
 
                         hTurn = true;
                     }
                 }
-                System.out.println(tempBoard);
-                System.out.println("GAME " + i + " END, WINS: " + wins);
+
                 this.tempBoard = new Board(this.dimension, b.toString().split("\n"));
-                System.out.println(tempBoard);
+
                 if (player == 'H') {
                     hTurn = true;
                 } else {
@@ -168,25 +153,18 @@ public class AgentMonteCarlo extends Agent {
             }
 
             if (wins/x > bestScore) {
-                System.out.print(bestScore);
-                System.out.println(wins/x);
-
                 bestScore = (wins/x);
                 bestMove = m;
+
+                if (bestScore == 100.0) {
+                    return bestMove;
+                }
             }
 
-            System.out.println(m + " STATS" + wins + "/" + x);
             wins = 0;
 
         }
 
-
-        System.out.println("ALL OVER");
-
-        System.out.println(bestMove);
-//        System.exit(1);
-
         return bestMove;
     }
-
 }

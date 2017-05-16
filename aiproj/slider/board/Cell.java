@@ -1,5 +1,3 @@
-package aiproj.slider.board;
-
 /* Hao Le - leh2
  * Sam Chung - chungs1
  * 
@@ -7,6 +5,8 @@ package aiproj.slider.board;
  * Last Modified: 07/04/17
  *
  */
+
+package aiproj.slider.board;
 
 public class Cell {
     private boolean isBlocked;
@@ -42,27 +42,12 @@ public class Cell {
         this.pieceType = pieceType;
     }
 
-    /**
-     * Getter for if a cell is blocked or not
-     */
     public boolean isBlocked() {
         return isBlocked;
     }
 
     public void setBlock(boolean block) {
         this.isBlocked = block;
-    }
-
-    /**
-     * Cell used for empty and blocking cells
-     * @param x X Coordinate of the cell
-     * @param y Y Coordinate of the cell
-     * @param value Whether this cell is blocked or not
-     *
-    public Cell(double x, double y, boolean value) {
-        this.isBlocked = value;
-        this.xPos = x;
-        this.yPos = y;
     }
 
     /**
@@ -95,23 +80,19 @@ public class Cell {
             // checks above, avoids top most row
             if (this.yPos != gameBoard.getBoardSize() - 1  && !gameBoard.getBoard()[(int) this.xPos][(int) this.yPos + 1].isBlocked()) {
                 num_moves += 1;
-//                System.out.println(this.yPos);
             }
 
             // checks right and finish line
             if (this.xPos == gameBoard.getBoardSize() - 1) {
                 num_moves += 1;
-//                System.out.println(this.yPos);
             } else if (!gameBoard.getBoard()[(int) this.xPos + 1][(int) this.yPos].isBlocked()) {
                 num_moves += 1;
-//                System.out.println(this.yPos);
             }
 
             // checks below, avoids bottom most row
             if (this.yPos != 0
                     && !gameBoard.getBoard()[(int) this.xPos][(int) this.yPos - 1].isBlocked()) {
                 num_moves += 1;
-//                System.out.println(this.yPos);
             }
 
             return num_moves;
