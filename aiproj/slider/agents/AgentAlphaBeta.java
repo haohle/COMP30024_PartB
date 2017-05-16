@@ -222,124 +222,121 @@ public class AgentAlphaBeta extends Agent {
      * @return heuristic value
      */
     private double evaluateMove() {
-        double score_mob = 0;
-        double score_pos = 0;
-        double score_pieces = 0;
-        double score_winloss = 0;
-        int myMobility;
-        int oppMobility;
-        EvaluationFunctions ef = new EvaluationFunctions();
-        ArrayList<Point> playerHLoc = gameBoard.getPlayerHLocations();
-        ArrayList<Point> playerVLoc = gameBoard.getPlayerVLocations();
-
-        if (this.player == 'H'){
-            //Checks the board state is a won or loss
-            if (playerHLoc.size() == 0){
-                return 10000 - (dimension-playerVLoc.size());
-            }
-            if (playerVLoc.size() == 0){
-                return -10000 + (dimension+playerHLoc.size());
-            }
-
-            // player H has less pieces
-//            if (playerHLoc.size() < playerVLoc.size()) {
-//                score_pieces += 50;
-//            } else if (playerHLoc.size() > playerVLoc.size()) {
-//                // H is a bloody dissapointment
-//                score_pieces -= 50;
-//            } else {
-//                // calc numLegalMoves here?
-//            }
-
-        }
-        if (this.player == 'V'){
-            if (playerHLoc.size() == 0){
-                score_winloss += -10000 + playerVLoc.size();
-            }
-            if (playerVLoc.size() == 0){
-                score_winloss += 10000 - playerHLoc.size();
-            }
-
-            // player H has less pieces
-//            if (playerVLoc.size() < playerHLoc.size()) {
-//                score_pieces += 50;
-//            } else if (playerVLoc.size() > playerHLoc.size()) {
-//                // H is a bloody dissapointment
-//                score_pieces -= 50;
-//            } else {
-                // calc numLegalMoves here?
-//            }
-        }
         double Hscore = 0;
         double Vscore = 0;
+        double score_winloss = 0;
         double penaltypoints = 0;
         boolean upperhalf = true;
         int numpiecesinend = 0;
 
-        for(Point p: playerHLoc){
+        EvaluationFunctions ef = new EvaluationFunctions();
+        ArrayList<Point> playerHLoc = gameBoard.getPlayerHLocations();
+        ArrayList<Point> playerVLoc = gameBoard.getPlayerVLocations();
+
+        if (this.player == 'H') {
+            //Checks the board state is a win or loss
+            if (playerHLoc.size() == 0) {
+                score_winloss += 10000;
+            }
+            //Encourages the lose with dignity
+            if (playerVLoc.size() == 0) {
+                score_winloss += -10000;
+            }
+
+        }
+        if (this.player == 'V') {
+
+            if (playerVLoc.size() == 0) {
+                score_winloss += 10000;
+            }
+
+            if (playerHLoc.size() == 0) {
+                //Lose with dignity
+                score_winloss += -10000;
+            }
+        }
+
+        for (Point p : playerHLoc) {
             Hscore += p.getX();
-            if (upperhalf && this.player == 'H' && p.getX()<halfway){
+            if (upperhalf && this.player == 'H' && p.getX() < halfway) {
                 upperhalf = false;
             }
-            if ((int)p.getX() == 0){
-                penaltypoints +=2;
-            }
-            //If enemy piece is on the end column
-            if((int)p.getX()==dimension-1){
-                for (Point p2: playerVLoc){
-                    if((int)p2.getX()==dimension-1){
-                        numpiecesinend++;
+            if (player == 'H') {
+                //PenaltyPoints for being on last column
+                if ((int) p.getX() == 0) {
+                    penaltypoints += 1;
+                }
+                //If enemy piece is on the end column
+                if ((int) p.getX() == dimension - 1) {
+                    for (Point p2 : playerVLoc) {
+                        if ((int) p2.getX() == dimension - 1) {
+                            numpiecesinend++;
+                        }
                     }
                 }
             }
         }
 
-        for(Point p: playerVLoc){
+        for (Point p : playerVLoc) {
             Vscore += p.getY();
-            if (upperhalf && this.player == 'V' && p.getY()<halfway){
+            if (upperhalf && this.player == 'V' && p.getY() < halfway) {
                 upperhalf = false;
             }
-            if ((int)p.getY() == 0){
-                penaltypoints +=2;
+            if (player == 'V') {
+                if ((int) p.getY() == 0) {
+                    penaltypoints += 1;
+                }
+                if ((int) p.getY() == dimension - 1) {
+                    for (Point p2 : playerHLoc) {
+                        if ((int) p2.getY() == dimension - 1) {
+                            numpiecesinend++;
+                        }
+                    }
+                }
             }
         }
 
-        if(this.player == 'H'){
-            //Don't forget about the H pieces which have finished
-            if (upperhalf){
-                if (playerHLoc.size() < dimension/2){
-                    Hscore += (dimension-playerHLoc.size())*dimension+1;
-                }
-                else{
-                    Hscore += (dimension-playerHLoc.size())*(dimension);
-                }
+        if (this.player == 'H') {
+            if (score_winloss == 0) {
+                //Don't forget about the H pieces which have finished
+                if (upperhalf) {
+                    if (playerHLoc.size() < dimension / 2) {
+                        Hscore += (dimension - playerHLoc.size()) * dimension + 1;
+                    } else {
+                        Hscore += (dimension - playerHLoc.size()) * (dimension);
+                    }
 
+                } else {
+                    Hscore += (dimension - playerHLoc.size()) * (dimension - 2);
+                }
+                Vscore += (dimension - playerVLoc.size()) * (dimension + 2);
             }
             else{
-                Hscore += (dimension-playerHLoc.size())*(dimension-2);
+                Vscore += (dimension - playerVLoc.size()) * (dimension);
             }
-
             //Prioritise blocking their pieces over finishing
-            Vscore += (dimension-playerVLoc.size())*(dimension+5);
-            return score_winloss + Hscore-Vscore-penaltypoints;
-        }
-        else{
-            if (upperhalf){
-                if (playerVLoc.size() < dimension/2){
-                    Vscore += (dimension-playerVLoc.size())*dimension+1;
-                }
-                else{
-                    Vscore += (dimension-playerVLoc.size())*(dimension);
-                }
+            return score_winloss + Hscore - Vscore - penaltypoints;
+        } else {
+            if (score_winloss == 0){
+                if (upperhalf) {
+                    if (playerVLoc.size() < dimension / 2) {
+                        Vscore += (dimension - playerVLoc.size()) * dimension + 1;
+                    } else {
+                        Vscore += (dimension - playerVLoc.size()) * (dimension);
+                    }
 
+                } else {
+                    Vscore += (dimension - playerVLoc.size()) * (dimension - 2);
+                }
+                Hscore += (dimension - playerHLoc.size()) * (dimension + 2);
             }
             else{
-                Vscore += (dimension-playerVLoc.size())*(dimension-2);
+                Hscore += (dimension - playerHLoc.size()) * (dimension);
             }
             //Don't forget about the H pieces which have finished
-            Hscore += (dimension-playerHLoc.size())*(dimension+5);
-            return score_winloss + Vscore-Hscore-penaltypoints;
+            return score_winloss + Vscore - Hscore - penaltypoints;
         }
+    }
 
 
         /* want majority of our pieces in front of the opponent to mark our territory */
@@ -395,7 +392,6 @@ public class AgentAlphaBeta extends Agent {
 //        }
 
 //        return score_mob+score_pos+score_pieces;
-    }
 
     /**
      * Reverse the original move made by reverting the board state back to what is was before
