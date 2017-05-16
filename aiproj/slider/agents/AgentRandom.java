@@ -21,7 +21,7 @@ public class AgentRandom extends Agent {
 
     @Override
     public Move move() {
-        possMoves = generateMoves(this.player);
+        possMoves = generateMoves(this.player, this.gameBoard);
 
         /* no possible moves */
         if (possMoves.size() == 0) {
