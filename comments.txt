@@ -27,6 +27,11 @@ Describe approach
 - Search strategy
     minimax
 - Evaluation function
+    primarily uses positioning of your players' pieces against the enemy pieces' positioning. It judges how far
+    each players' pieces have progressed on the board and tries to increase our position whilst decreasing theirs.
+    Evaluation weighting changes as the game progresses (Halfway point, 3/4 point)
+    (this is judged by the positioning of your pieces). It weights the number of finished pieces of each player
+    differently at each stage to encourage blocking and allow our pieces to progress down the board.
 
 - Creative techniques
     - search strategy optimization
@@ -36,7 +41,7 @@ Describe approach
     - game-specific heuristics
 
     - specialised data structure
-        N/A
+        hashmap - used to ensure a game state is not repeated.
     - code optimisations
         sorted possible moves with a strong preference on:
             moving right then up (for H)
