@@ -25,10 +25,10 @@ public class AgentChungle extends Agent {
     int depth; // for minimax search
 
     /* Used for monte carlo simulation */
-    private Random rng;
-    private Move move;
+//    private Random rng;
+//    private Move move;
 
-    private double x = 1000;
+    private double x = 13000;
     private double wins = 0;
 
     private List<Move> monteMoves;
@@ -54,10 +54,22 @@ public class AgentChungle extends Agent {
         switch (this.stage) {
             default:
             case EARLYGAME:
-                return minimaxStrat(4);
+                if (this.dimension == 5) {
+                    return minimaxStrat(4);
+                } else if (this.dimension == 6) {
+                    return minimaxStrat(8);
+                } else {
+                    return minimaxStrat(6);
+                }
 
             case MIDGAME:
-                return minimaxStrat(10);
+                if (this.dimension == 5) {
+                    return minimaxStrat(11);
+                } else if (this.dimension == 6) {
+                    return minimaxStrat(10);
+                } else {
+                    return minimaxStrat(8);
+                }
 
             case ENDGAME:
                 return endStrat();
@@ -66,6 +78,7 @@ public class AgentChungle extends Agent {
 
     @Override
     public void update(Move move) {
+
         /* no move was made, don't update board */
         if (move == null) {
             return;
@@ -173,6 +186,8 @@ public class AgentChungle extends Agent {
 
         this.depth = d;
 
+        System.out.println(this.depth);
+
         /* generates the possible moves the player can make at it's current state */
         this.possMoves = generateMoves(this.player, this.gameBoard);
         if (this.player == 'H') {
@@ -208,7 +223,7 @@ public class AgentChungle extends Agent {
             }
         }
 
-        System.out.println(possMoves + " " + bestMove);
+//        System.out.println(possMoves + " " + bestMove);
         this.update(bestMove.getMove());
         hm.put(gameBoard.toString(),1);
 
@@ -216,8 +231,9 @@ public class AgentChungle extends Agent {
     }
 
     public Move endStrat() {
-
-        Move tmpMonte = monteMove(this.player, this.gameBoard);
+        System.out.println("END");
+        origBoard = new Board(this.dimension, this.gameBoard.toString().split("\n"));
+        Move tmpMonte = monteMove(this.player, origBoard);
 
         this.update(tmpMonte);
         return tmpMonte;
@@ -496,17 +512,19 @@ public class AgentChungle extends Agent {
     }
 
     public Move monteMove(char player, Board b) {
+        System.out.println("Monte Carlo");
         this.tempBoard = new Board(this.dimension, b.toString().split("\n"));
         bestMove = null;    // move being returned
         bestScore = 0;
+        wins = 0;
 
         boolean hTurn;
         boolean simulate = true;
         boolean first = true;
 
-        /* for simulation in monte carlo */
-        long seed = System.nanoTime();
-        rng = new Random(seed);
+//        /* for simulation in monte carlo */
+//        long seed = System.nanoTime();
+//        rng = new Random(seed);
 
         /* identifies who's turn it is */
         if (player == 'H') {
@@ -535,6 +553,7 @@ public class AgentChungle extends Agent {
                     if (hTurn) {
                         if (first && player == 'H') {
                             tempBoard.update(tempBoard, m);
+//                            tempBoard.printB(tempBoard);
                             first = false;
                         } else {
                             // simulation
@@ -551,6 +570,7 @@ public class AgentChungle extends Agent {
                             move = hMoves.get(rng.nextInt(hMoves.size()));
 
                             tempBoard.update(tempBoard, move);
+//                            tempBoard.printB(tempBoard);
                         }
 
                         if (tempBoard.getPlayerHLocations().size() == 0) { // no more remaining, game over
@@ -564,6 +584,7 @@ public class AgentChungle extends Agent {
                     } else {
                         if (first && player == 'V') {
                             tempBoard.update(tempBoard, m);
+//                            tempBoard.printB(tempBoard);
                             first = false;
                         } else {
                             vMoves = generateMoves('V', tempBoard);
@@ -579,6 +600,7 @@ public class AgentChungle extends Agent {
                             move = vMoves.get(rng.nextInt(vMoves.size()));
 
                             tempBoard.update(tempBoard, move);
+//                            tempBoard.printB(tempBoard);
                         }
 
                         if (tempBoard.getPlayerVLocations().size() == 0) { // no more, game over
@@ -592,7 +614,9 @@ public class AgentChungle extends Agent {
                     }
                 }
 
+//                System.out.println("GAME " + i + "END, WINS: " + wins);
                 this.tempBoard = new Board(this.dimension, b.toString().split("\n"));
+//                tempBoard.printB(tempBoard);
 
                 if (player == 'H') {
                     hTurn = true;
@@ -601,11 +625,20 @@ public class AgentChungle extends Agent {
                 }
             }
 
-            if (wins/x > bestScore) {
+            /* simulation over, review move */
+//            System.out.println((wins/x));
+//            System.out.println(m);
+
+            if ((wins/x) >= bestScore) {
                 bestScore = (wins/x);
                 bestMove = m;
 
-                if (bestScore == 100.0) {
+                if (bestScore > 0.9) {
+                    /* against a good opponent this will rarely happen as the
+                     * game will be pretty close up until the end
+                     */
+                    System.out.println("MONTE DONE EARLY");
+                    wins = 0;
                     return bestMove;
                 }
             }
@@ -618,27 +651,51 @@ public class AgentChungle extends Agent {
     }
 
     private void checkStage() {
-        if ((this.gameBoard.getPlayerHLocations().size() <= 3 && this.player == 'H') &&
-                (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= 5)) {
-            /* monte carlo (this is used for the end game)
-             * NOTE: Will have to fine tune this or add in a safety guard just to make sure we don't use up all our
-             *       time evaluating monte carlo
-             */
+
+        if (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= (((this.dimension - 1) * 2) - 2)) {
             this.stage = GameStage.ENDGAME;
-        } else if ((this.gameBoard.getPlayerVLocations().size() <= 3 && this.player == 'V') &&
-                (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= 5)) {
-            /* monte carlo (this is used for the end game)
-             * NOTE: Will have to fine tune this or add in a safety guard just to make sure we don't use up all our
-             *       time evaluating monte carlo
-             */
-            this.stage = GameStage.ENDGAME;
-        } else if (this.gameBoard.getPlayerHLocations().size() <= (this.dimension/2) || this.gameBoard.getPlayerVLocations().size() <= (this.dimension/2)) {
-            /* mid game */
-            this.stage = GameStage.MIDGAME;
-        } else {
-            /* early game */
-            this.stage = GameStage.EARLYGAME;
+            return;
+        }
+
+        double distValH = 0;
+        double distValV = 0;
+        if (this.dimension == 5 || this.dimension == 7) {
+
+            for (Point h: this.gameBoard.getPlayerHLocations()) {
+                distValH += (h.getX() - ((this.dimension / 2) - 1));
+            }
+
+            for (Point v: this.gameBoard.getPlayerVLocations()) {
+                distValV += (v.getY() - ((this.dimension / 2) - 1));
+            }
+            // are majority past, average of distances away from the point we wanna be past
+            if ( ((distValH / this.gameBoard.getPlayerHLocations().size()) > 0) || (distValV / this.gameBoard.getPlayerVLocations().size() > 0) ) {
+                // change heuristic instead of just changing depth?
+                this.stage = GameStage.MIDGAME;
+                return;
+            } else {
+                this.stage = GameStage.EARLYGAME;
+                return;
+            }
+        }
+
+        if (this.dimension == 6) {
+            for (Point h: this.gameBoard.getPlayerHLocations()) {
+                distValH += (h.getX() - (this.dimension / 3));
+            }
+
+            for (Point v: this.gameBoard.getPlayerVLocations()) {
+                distValV += (v.getY() - (this.dimension / 3));
+            }
+            // are majority past, average of distances away from the point we wanna be past
+            if ( ((distValH / this.gameBoard.getPlayerHLocations().size()) > 0) || (distValV / this.gameBoard.getPlayerVLocations().size() > 0) ) {
+                // change heuristic instead of just changing depth?
+                this.stage = GameStage.MIDGAME;
+                return;
+            } else {
+                this.stage = GameStage.EARLYGAME;
+                return;
+            }
         }
     }
-
 }

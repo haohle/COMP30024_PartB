@@ -9,14 +9,12 @@ import aiproj.slider.Move;
  */
 public class AgentRandom extends Agent {
 
-    /* Used for random move agent */
-    private Random rng;
+//    /* Used for random move agent */
+//    private Random rng;
     private Move move;
 
     public AgentRandom() {
-        /* for random move agent */
-        long seed = System.nanoTime();
-        rng = new Random(seed);
+
     }
 
     @Override

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.*;
 
 import aiproj.slider.Move;
 import aiproj.slider.SliderPlayer;
@@ -14,7 +15,7 @@ import aiproj.slider.board.Cell;
 /**
  * Created by hao on 15/5/17.
  */
-public class Agent implements SliderPlayer {
+public abstract class Agent implements SliderPlayer {
 
     /* AgentAlphaBeta */
     protected char player;
@@ -31,6 +32,11 @@ public class Agent implements SliderPlayer {
     protected List<Move> oppMoves;
     protected HashMap hm = new HashMap();
 
+    /* Used for random move agent */
+    protected Random rng;
+    protected Move move;
+
+    @Override
     public void init(int d, String b, char p) {
         this.dimension = d;
         this.player = p;
@@ -45,13 +51,15 @@ public class Agent implements SliderPlayer {
         } else {
             this.opponent = 'V';
         }
+
+        /* for random move agent */
+        long seed = System.nanoTime();
+        rng = new Random(seed);
     }
 
-    public Move move() {
+    public abstract Move move();
 
-        return null;
-    }
-
+    @Override
     public void update(Move move) {
         /* no move was made, don't update board */
         if (move == null) {
