@@ -359,9 +359,9 @@ public class AgentChungle extends Agent {
         for (Point p : playerHLoc) {
             Hscore += p.getX();
             if (player == 'H') {
-                //PenaltyPoints for being on the starting column
-                if ((int) p.getX() == 0) {
-                    penaltypoints += 1;
+                //PenaltyPoints for being in the starting third of the board
+                if ((int) p.getX() < ((dimension-1)/3.0)*dimension) {
+                    penaltypoints += ((dimension-1)/3.0)*dimension-p.getX();
                 }
             }
         }
@@ -369,16 +369,16 @@ public class AgentChungle extends Agent {
         for (Point p : playerVLoc) {
             Vscore += p.getY();
             if (player == 'V') {
-                //PenaltyPoints for being on the starting row
-                if ((int) p.getY() == 0) {
-                    penaltypoints += 1;
+                //PenaltyPoints for being in the starting third of the board
+                if ((int) p.getY() < ((dimension-1)/3.0)*dimension) {
+                    penaltypoints += ((dimension-1)/3.0)*dimension-p.getY();
                 }
             }
         }
 
 
         if (this.player == 'H') {
-            if (Hscore+(dimension - playerHLoc.size())*dimension > dimension*(dimension-1)-(((dimension-1)/4.0)*dimension)) {
+            if (Hscore+(dimension - playerHLoc.size())*dimension > dimension*(dimension-1)-(((dimension-1)/3.0)*dimension)) {
                 //If pieces are more than 3/4 of the way across the board
                 Hscore += (dimension - playerHLoc.size()) * (dimension+1);
                 //Priority of blocking.
@@ -398,7 +398,7 @@ public class AgentChungle extends Agent {
             return score_winloss + Hscore - Vscore - penaltypoints;
 
         } else {
-            if (Vscore+(dimension - playerVLoc.size())*dimension > dimension*(dimension-1)-(((dimension-1)/4.0)*dimension)){
+            if (Vscore+(dimension - playerVLoc.size())*dimension > dimension*(dimension-1)-(((dimension-1)/3.0)*dimension)){
                 //If pieces are more than 3/4 of the way across the board
                 Vscore += (dimension - playerVLoc.size()) * (dimension+1);
                 Hscore += (dimension - playerHLoc.size()) * (dimension);
