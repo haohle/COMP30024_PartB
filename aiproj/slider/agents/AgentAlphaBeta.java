@@ -22,7 +22,7 @@ import aiproj.slider.Move;
 
 public class AgentAlphaBeta extends Agent {
 
-    //private double halfway = (dimension / 2.0);
+    private double halfway = (dimension / 2.0);
     private double prevMaxDistH = Double.POSITIVE_INFINITY;
     private double prevMaxDistV = Double.POSITIVE_INFINITY;
     private double prevPiecesH = Double.POSITIVE_INFINITY;
@@ -45,43 +45,48 @@ public class AgentAlphaBeta extends Agent {
 
         int depth; // for minimax search
 
-//         if (this.gameBoard.getPlayerHLocations().size() <= 2 && (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= 5)) {
-//             depth = 16;
-//         } else if (this.gameBoard.getPlayerVLocations().size() <= 2 && (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= 5)) {
-//            if here but we have much less pieces than opponent, just use a smaller depth otherwise too risky
-//             depth = 12;
-      
-        if (this.gameBoard.getPlayerHLocations().size() <= 3 && this.player == 'H') {
-//            depth = 10;
-            System.out.println("OVER HERE");
+        if ((this.gameBoard.getPlayerHLocations().size() <= 3 && this.player == 'H') && 
+            (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= 5)) {
+            /* monte carlo (this is used for the end game)
+             * NOTE: Will have to fine tune this or add in a safety guard just to make sure we don't use up all our 
+             *       time evaluating monte carlo
+             */
             monte.init(this.dimension, this.gameBoard, this.player);
+
             Move tmpMonte = monte.getMove(this.player, this.gameBoard);
+
             this.update(tmpMonte);
             return tmpMonte;
-        } else if (this.gameBoard.getPlayerVLocations().size() <= 2 && (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= 5)) {
-//            if here but we have much less pieces than opponent, just use a smaller depth otherwise too risky
-            depth = 10;
+        } else if ((this.gameBoard.getPlayerVLocations().size() <= 3 && this.player == 'V') && 
+                    (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= 5)) {
+            /* monte carlo (this is used for the end game)
+             * NOTE: Will have to fine tune this or add in a safety guard just to make sure we don't use up all our 
+             *       time evaluating monte carlo
+             */
+            monte.init(this.dimension, this.gameBoard, this.player);
+
+            Move tmpMonte = monte.getMove(this.player, this.gameBoard);
+
+            this.update(tmpMonte);
+            return tmpMonte;
         } else if (this.gameBoard.getPlayerHLocations().size() <= (this.dimension/2) || this.gameBoard.getPlayerVLocations().size() <= (this.dimension/2)) {
-            // mid game
-            depth = 5;
+            /* mid game */
+            depth = 8;
         } else {
-            // while still in early stages of game
-            depth = 3;
+            /* early game */
+            depth = 4;
         }
 
         /* generates the possible moves the player can make at it's current state */
         this.possMoves = generateMoves(this.player, this.gameBoard);
-        if (this.player == 'H'){
+        if (this.player == 'H') {
             Collections.sort(possMoves, MoveListComparator.HComparator);
-        }
-        else{
+        } else {
             Collections.sort(possMoves, MoveListComparator.VComparator);
         }
-//        System.out.println(this.possMoves);
 
         /* no moves are possible, pass turn */
         if (this.possMoves.size() == 0) {
-            //System.out.println("*** NO MOVES POSSIBLE, PASSING ***");
             return null;
         }
 
