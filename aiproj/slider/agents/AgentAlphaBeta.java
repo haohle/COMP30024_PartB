@@ -45,12 +45,6 @@ public class AgentAlphaBeta extends Agent {
 
         int depth; // for minimax search
 
-//         if (this.gameBoard.getPlayerHLocations().size() <= 2 && (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= 5)) {
-//             depth = 16;
-//         } else if (this.gameBoard.getPlayerVLocations().size() <= 2 && (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= 5)) {
-//            if here but we have much less pieces than opponent, just use a smaller depth otherwise too risky
-//             depth = 12;
-      
         if (this.gameBoard.getPlayerHLocations().size() <= 3 && this.player == 'H') {
 //            depth = 10;
             System.out.println("OVER HERE");
@@ -77,11 +71,9 @@ public class AgentAlphaBeta extends Agent {
         else{
             Collections.sort(possMoves, MoveListComparator.VComparator);
         }
-//        System.out.println(this.possMoves);
 
         /* no moves are possible, pass turn */
         if (this.possMoves.size() == 0) {
-            //System.out.println("*** NO MOVES POSSIBLE, PASSING ***");
             return null;
         }
 
@@ -107,7 +99,6 @@ public class AgentAlphaBeta extends Agent {
             }
         }
 
-        System.out.println(possMoves + " " + bestMove);
         this.update(bestMove.getMove());
         hm.put(gameBoard.toString(),1);
       
@@ -120,7 +111,6 @@ public class AgentAlphaBeta extends Agent {
      */
     private MoveManager minimax(Move m, int d, boolean mp, double alpha, double beta) {
 
-//        System.out.println("****DEPTH " + d + "****");
         MoveManager tmpMove = null;
         MoveManager maxMove = null;
         MoveManager minMove = null;
@@ -132,12 +122,6 @@ public class AgentAlphaBeta extends Agent {
             MoveManager move = new MoveManager(m, -20000);
             return move;
         };
-
-//        if (move.getScore() > 20) {
-
-//            System.out.println(move.getScore());
-//            return move;
-//        }
 
         /* Base Case 1 - Reached Specified Depth of Search
          * Base Case 2 - Reached End of Game (No player V or H pieces left) */
@@ -246,23 +230,6 @@ public class AgentAlphaBeta extends Agent {
         double Hscore = 0;
         double Vscore = 0;
         double score_winloss = 0;
-
-//         int myMobility;
-//         int oppMobility;
-
-//         EvaluationFunctions ef = new EvaluationFunctions();
-//         ArrayList<Point> playerHLoc = gameBoard.getPlayerHLocations();
-//         ArrayList<Point> playerVLoc = gameBoard.getPlayerVLocations();
-
-//         double totalDist = 0;
-//         double manDist = 0;
-//         ArrayList<Double> distancesH = new ArrayList<>();
-
-//         if (this.player == 'H'){
-//             /* checks the board state for a won or loss */
-//             if (playerHLoc.size() == 0){
-//                 score_winloss += 10000 - playerVLoc.size();
-      
         double penaltypoints = 0;
 
         ArrayList<Point> playerHLoc = gameBoard.getPlayerHLocations();
@@ -278,185 +245,6 @@ public class AgentAlphaBeta extends Agent {
                 score_winloss += -10000;
             }
 
-// <<<<<<< haoAI
-// //            /* checks for if there's less pieces on the board */
-// //            if (playerHLoc.size() < playerVLoc.size()) {
-// //                score_pieces += 100;
-// //            } else if (playerHLoc.size() > playerVLoc.size()) {
-// //                score_pieces -= 100;
-// //            } else {
-// //                // calc numLegalMoves here?
-// //            }
-// //
-// //            score_pieces += (dimension - playerHLoc.size()) * 20;
-// //
-//             // check photo gallery for picture of scenario need to handle
-//             // mobility difference should be able to handle it
-
-//             /* checks average distance of all pieces away from the end point */
-//             for (Point p : playerHLoc) {
-//                 // find shortest possible path to end
-//                 for (int i = 0; i < dimension; i++) {
-//                     manDist = manhattanDistance(dimension, (int) p.getX(), i, (int) p.getY());
-
-//                     // acount for obstacles in the way
-//                     // include B pieces too
-//                     // not accurate
-//                     for (Point o : playerVLoc) {
-//                         // something on the same row that will block this piece
-//                         if (i == o.getY()) {
-//                             if (p.getX() < o.getX()) {
-//                                 manDist += 1;
-// //                                break; // only need to worry about the first thing blocking?
-//                             }
-//                         } else {
-//                             // clear line of sight
-//                             break;
-//                         }
-//                     }
-
-//                     distancesH.add(manDist);
-//                 }
-
-//                 Collections.sort(distancesH);   // sort in ascending order (smallest to largest)
-//                 totalDist += distancesH.get(0); // shortest distance to end
-//             }
-// //            totalDist /= playerHLoc.size();
-//             if (totalDist < this.prevMaxDistH) {
-//                 this.prevMaxDistH = totalDist;
-//                 score_pos += 5;
-//             } else {
-//                 score_pos -= 5;
-//             }
-
-// //            System.out.println(totalDist);
-// //
-//             /* want majority of our pieces in front of the opponent to mark our territory
-//              * might be less resource intensive to just average all piece Y locations?
-//              */
-//             for (Point p : playerHLoc) {
-//                 for (Point o : playerVLoc) {
-//                     /* higher importance on moving up (y position), reward if above opponent */
-//                     if (p.getX() < o.getX()) {
-//                         score_pos -= 2;
-//                     } else {
-//                         score_pos += 3;
-//                     }
-
-//                     if (p.getY() < o.getY()) {
-//                         score_pos -= 1;
-//                     } else {
-//                         score_pos += 2;
-//                     }
-//                 }
-//             }
-
-//             /* meaningful blocks in the last row or column before finishing piece */
-//             for (Point p1 : playerHLoc) {
-//                 double tmpX1 = p1.getX();
-//                 double tmpY1 = p1.getY();
-
-//                 // check if in last column
-//                 if (tmpX1 == dimension - 1) {
-//                     // check if any opponents under
-//                     for (Point p2 : playerVLoc) {
-//                         double tmpX2 = p2.getX();
-//                         double tmpY2 = p2.getY();
-
-//                         // strategically not finish move
-//                         if (tmpX1 == tmpX2 && tmpY1 > tmpY2) {
-//                             score_pos += 2;
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-
-//         if (this.player == 'V'){
-//             /* checks the board state for a won or loss */
-//             if (playerHLoc.size() == 0){
-//                 score_winloss += -10000 + playerVLoc.size();
-//             }
-//             if (playerVLoc.size() == 0){
-//                 score_winloss += 10000 - playerHLoc.size();
-//             }
-
-// //            /* checks for if there's less pieces on the board */
-// //            if (playerVLoc.size() < playerHLoc.size()) {
-// //                score_pieces += 100;
-// //            } else if (playerVLoc.size() > playerHLoc.size()) {
-// //                score_pieces -= 100;
-// //            } else {
-// //                // calc numLegalMoves here?
-// //            }
-// //
-// //            score_pieces += (dimension - playerHLoc.size()) * 20;
-// //
-//             /* checks average distance of all pieces away from the end point */
-//             for (Point p : playerVLoc) {
-//                 totalDist += (dimension - p.getY());
-//             }
-// //            totalDist /= playerHLoc.size();
-//             if (totalDist < this.prevMaxDistV) {
-//                 this.prevMaxDistV = totalDist;
-//                 score_pos += 5;
-//             } else {
-//                 score_pos -= 5;
-//             }
-// //
-//             /* want majority of our pieces in front of the opponent to mark our territory
-//              * might be less resource intensive to just average all piece Y locations?
-//              */
-//             for (Point p : playerVLoc) {
-//                 for (Point o : playerHLoc) {
-//                     /* higher importance on moving up (y position), reward if above opponent */
-//                     if (p.getY() < o.getY()) {
-//                         score_pos -= 2;
-//                     } else {
-//                         score_pos += 3;
-//                     }
-
-//                     if (p.getX() < o.getX()) {
-//                         score_pos -= 1;
-//                     } else {
-//                         score_pos += 2;
-//                     }
-//                 }
-//             }
-
-//             /* meaningful blocks in the last row or column before finishing piece */
-//             for (Point p1 : playerVLoc) {
-//                 double tmpX1 = p1.getX();
-//                 double tmpY1 = p1.getY();
-
-//                 // check if in last row
-//                 if (tmpY1 == dimension - 1) {
-//                     // check if any opponents under
-//                     for (Point p2 : playerHLoc) {
-//                         double tmpX2 = p2.getX();
-//                         double tmpY2 = p2.getY();
-
-//                         // strategically not finish move
-//                         if (tmpY1 == tmpY2 && tmpX1 > tmpX2) {
-//                             score_pos += 2;
-//                         } else {
-//                             score_pos -= 1;
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-
-//         double Hscore = 0;
-//         double Vscore = 0;
-//         double penaltypoints = 0;
-//         boolean upperhalf = true;
-
-//         for (Point p : playerHLoc) {
-//             Hscore += p.getX();
-//             if (upperhalf && this.player == 'H' && p.getX() < halfway) {
-//                 upperhalf = false;
-// =======
         }
         if (this.player == 'V') {
 
@@ -477,25 +265,11 @@ public class AgentAlphaBeta extends Agent {
                 if ((int) p.getX() == 0) {
                     penaltypoints += 1;
                 }
-// >>>>>>> master
             }
         }
 
         for (Point p : playerVLoc) {
             Vscore += p.getY();
-// <<<<<<< haoAI
-//             if (upperhalf && this.player == 'V' && p.getY() < halfway) {
-//                 upperhalf = false;
-//             }
-//         }
-
-//         if (this.player == 'H') {
-//             //Don't forget about the H pieces which have finished
-//             if (upperhalf) {
-//                 Hscore += (dimension - playerHLoc.size()) * (dimension);
-//             } else {
-//                 Hscore += (dimension - playerHLoc.size()) * (dimension - 2);
-// =======
             if (player == 'V') {
                 //PenaltyPoints for being on the starting row
                 if ((int) p.getY() == 0) {
@@ -522,38 +296,9 @@ public class AgentAlphaBeta extends Agent {
                 //Starting Play
                 Hscore += (dimension - playerHLoc.size()) * (dimension - 1);
                 Vscore += (dimension - playerVLoc.size()) * (dimension + 2);
-// >>>>>>> master
             }
             return score_winloss + Hscore - Vscore - penaltypoints;
 
-// <<<<<<< haoAI
-//             //Prioritise blocking their pieces over finishing
-//             Vscore += (dimension - playerVLoc.size()) * (dimension);
-//             return score_mob + score_pos + score_pieces + score_winloss + Hscore - Vscore - penaltypoints;
-//         } else {
-//             if (upperhalf) {
-//                 Vscore += (dimension - playerVLoc.size()) * (dimension);
-//             } else {
-//                 Vscore += (dimension - playerVLoc.size()) * (dimension - 2);
-//             }
-//             //Don't forget about the H pieces which have finished
-//             Hscore += (dimension - playerHLoc.size()) * (dimension);
-//             return score_mob + score_pos + score_pieces + score_winloss + Hscore - Vscore - penaltypoints;
-//         }
-
-//         //Calculates mobility of players' pieces
-// //        myMobility = numBlocks(this.player, this.gameBoard);
-// //        oppMobility = numBlocks(this.opponent, this.gameBoard);
-// //        score_mob = myMobility - oppMobility;
-
-// //        if (this.player == 'H'){
-// //            score_pos = ef.evaluatePiecePos(this.player, playerHLoc, dimension) -
-// //                    ef.evaluatePiecePos(this.opponent, playerVLoc, dimension);
-// //        } else {
-// //            score_pos = ef.evaluatePiecePos(this.player, playerVLoc, dimension) -
-// //                    ef.evaluatePiecePos(this.opponent, playerVLoc, dimension);
-// //        }
-// =======
         } else {
             if (Vscore+(dimension - playerVLoc.size())*dimension > (dimension-((dimension-1)/4.0))*dimension){
                 //If pieces are more than 3/4 of the way across the board
@@ -571,7 +316,6 @@ public class AgentAlphaBeta extends Agent {
             return score_winloss + Vscore - Hscore - penaltypoints;
         }
 
-// >>>>>>> master
     }
     /**
      * Reverse the original move made by reverting the board state back to what is was before
