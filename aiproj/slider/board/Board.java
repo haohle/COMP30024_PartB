@@ -8,10 +8,14 @@
 
 package aiproj.slider.board;
 
+import aiproj.slider.Move;
+
+import java.lang.Enum;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Iterator;
 
-public class Board {
+public class Board implements Cloneable {
 
     private static final char BLOCK = 'B';
     private static final char EMPTY = '+';
@@ -46,6 +50,10 @@ public class Board {
         return board;
     }
 
+    public void setBoard(Board b) {
+        System.out.println(b);
+    }
+
     public void updateBoard(int x, int y, char piece) {
 //        System.out.println(x + " , " + y);
         this.board[x][y] = new Cell(x, y, new Piece(piece));
@@ -56,8 +64,6 @@ public class Board {
             this.playerVLocations.add(new Point(x, y));
         } else {
             // piece is +
-
-
         }
     }
 
@@ -127,6 +133,128 @@ public class Board {
 //            }
 //            System.out.print("\n");
             y++;
+        }
+    }
+
+    public void update(Board b, Move move) {
+        /* no move was made, don't update board */
+        if (move == null) {
+            return;
+        }
+
+        /* cell that is being moved to */
+        int to_i = move.i, to_j = move.j;
+        switch (move.d) {
+            case UP:
+                to_j++;
+                break;
+            case DOWN:
+                to_j--;
+                break;
+            case RIGHT:
+                to_i++;
+                break;
+            case LEFT:
+                to_i--;
+                break;
+        }
+
+        /* moving to a location which is off the board? */
+        if (to_i == b.boardSize) {
+            b.getBoard()[move.i][move.j].setPieceTypeChar('+');
+
+            /* remove point from ArrayList - used to keep track of pieces */
+            for (Iterator<Point> it = b.getPlayerHLocations().iterator(); it.hasNext();) {
+                Point point = it.next();
+                /* find the point which is the one that's being moved off board */
+                if (point.getX() == move.i && point.getY() == move.j) {
+                    it.remove();
+                }
+
+            }
+
+            /* update the board and make it free at this cell */
+            // TO DO: might not even need this
+            b.getBoard()[move.i][move.j].setBlock(false);
+
+            return;
+        }
+
+        if (to_j == b.boardSize) {
+//            System.out.println("HERE " + move.i + " , " + move.j);
+            b.getBoard()[move.i][move.j].setPieceTypeChar('+');
+
+            /* removes point from ArrayList - used to keep track of pieces */
+            for (Iterator<Point> it = b.getPlayerVLocations().iterator(); it.hasNext();) {
+                Point point = it.next();
+                /* find the point which is the one that's being moved off board */
+                if (point.getX() == move.i && point.getY() == move.j) {
+                    it.remove();
+                }
+            }
+
+            /* update the board and make it free at this cell */
+            // TO DO: might not even need this
+            b.getBoard()[move.i][move.j].setBlock(false);
+
+            return;
+        }
+
+        /* cell that is being moved away from */
+        Cell cell = b.getBoard()[move.i][move.j];
+        char tmpCellChar = cell.getPieceTypeChar();
+
+        /* make move (not off board) - update board */
+        b.updateBoard(move.i, move.j, '+');
+        b.updateBoard(to_i, to_j, tmpCellChar);
+
+        /* used to update the players memory of where pieces are currently at */
+        if (tmpCellChar == 'H') {
+            for (Iterator<Point> it = b.getPlayerHLocations().iterator(); it.hasNext();) {
+                Point point = it.next();
+                /* find the point which is the one that's being moved off board */
+                if (point.getX() == move.i && point.getY() == move.j) {
+                    it.remove();
+                }
+            }
+        }
+        if (tmpCellChar == 'V') {
+            for (Iterator<Point> it = b.getPlayerVLocations().iterator(); it.hasNext();) {
+                Point point = it.next();
+                /* find the point which is the one that's being moved off board */
+                if (point.getX() == move.i && point.getY() == move.j) {
+                    it.remove();
+                }
+            }
+        }
+    }
+
+    /** Enumeration of all of the possible states of a board position */
+    public String toString(){
+        StringBuilder s = new StringBuilder(2 * boardSize * boardSize);
+        for (int j = boardSize-1; j >= 0; j--) {
+            s.append(board[0][j].getPieceTypeChar());
+            for (int i = 1; i < boardSize; i++) {
+                s.append(' ');
+                s.append(board[i][j].getPieceTypeChar());
+            }
+            s.append('\n');
+        }
+        return s.toString();
+    }
+
+    public void printB(Board b) {
+        System.out.print("H: ");
+        System.out.println(b.getPlayerHLocations());
+        System.out.print("V: ");
+        System.out.println(b.getPlayerVLocations());
+
+        Cell[][] test = b.getBoard();
+        for (int j = b.boardSize - 1; j >= 0; j--) {
+            for (int i = 0; i < b.boardSize; i++) {
+                System.out.print(test[i][j].getPieceTypeChar() + " ");
+            }
+            System.out.print("\n");
         }
     }
 }

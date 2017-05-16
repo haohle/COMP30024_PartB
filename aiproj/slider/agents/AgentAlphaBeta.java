@@ -31,6 +31,8 @@ public class AgentAlphaBeta extends Agent {
     private double prevPiecesH = Double.POSITIVE_INFINITY;
     private double prevPiecesV = Double.POSITIVE_INFINITY;
 
+    AgentMonteCarlo monte = new AgentMonteCarlo();
+
     /**
      * Dictates the move for the player, this agent makes use of the
      * minimax (with a-b pruning) algorithm
@@ -46,21 +48,26 @@ public class AgentAlphaBeta extends Agent {
 
         int depth; // for minimax search
 
-        if (this.gameBoard.getPlayerHLocations().size() <= 2 && (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= 5)) {
-            depth = 10;
+        if (this.gameBoard.getPlayerHLocations().size() <= 3 && this.player == 'H') {
+//            depth = 10;
+            System.out.println("OVER HERE");
+            monte.init(this.dimension, this.gameBoard, this.player);
+            Move tmpMonte = monte.getMove(this.player, this.gameBoard);
+            this.update(tmpMonte);
+            return tmpMonte;
         } else if (this.gameBoard.getPlayerVLocations().size() <= 2 && (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= 5)) {
 //            if here but we have much less pieces than opponent, just use a smaller depth otherwise too risky
             depth = 10;
         } else if (this.gameBoard.getPlayerHLocations().size() <= (this.dimension/2) || this.gameBoard.getPlayerVLocations().size() <= (this.dimension/2)) {
             // mid game
-            depth = 8;
+            depth = 5;
         } else {
             // while still in early stages of game
-            depth = 6;
+            depth = 3;
         }
 
         /* generates the possible moves the player can make at it's current state */
-        this.possMoves = generateMoves(this.player);
+        this.possMoves = generateMoves(this.player, this.gameBoard);
         if (this.player == 'H'){
             Collections.sort(possMoves, MoveListComparator.HComparator);
         }
@@ -125,7 +132,7 @@ public class AgentAlphaBeta extends Agent {
 
         if (mp) {
             /* generates all possible moves for maximizing player */
-            List<Move> possMoves = generateMoves(this.player);
+            List<Move> possMoves = generateMoves(this.player, this.gameBoard);
             if (this.player == 'H'){
                 Collections.sort(possMoves, MoveListComparator.HComparator);
             }
@@ -163,7 +170,7 @@ public class AgentAlphaBeta extends Agent {
             return maxMove;
         } else {
             /* generates all possible moves for minimizing player */
-            List<Move> oppMoves = generateMoves(this.opponent);
+            List<Move> oppMoves = generateMoves(this.opponent, this.gameBoard);
             if (this.player == 'H'){
                 Collections.sort(oppMoves, MoveListComparator.HComparator);
             }
@@ -243,8 +250,6 @@ public class AgentAlphaBeta extends Agent {
             if (playerVLoc.size() == 0){
                 score_winloss += -10000 + playerHLoc.size();
             }
-
-
 
 //            /* checks for if there's less pieces on the board */
 //            if (playerHLoc.size() < playerVLoc.size()) {
@@ -333,8 +338,6 @@ public class AgentAlphaBeta extends Agent {
                         // strategically not finish move
                         if (tmpX1 == tmpX2 && tmpY1 > tmpY2) {
                             score_pos += 2;
-                        } else {
-                            score_pos -= 1;
                         }
                     }
                 }
@@ -398,7 +401,7 @@ public class AgentAlphaBeta extends Agent {
                 double tmpX1 = p1.getX();
                 double tmpY1 = p1.getY();
 
-                // check if in last column
+                // check if in last row
                 if (tmpY1 == dimension - 1) {
                     // check if any opponents under
                     for (Point p2 : playerHLoc) {
