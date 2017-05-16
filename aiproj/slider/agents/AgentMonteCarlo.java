@@ -156,7 +156,7 @@ public class AgentMonteCarlo extends Agent {
                 bestScore = (wins/x);
                 bestMove = m;
 
-                if (bestSore == 100.0) {
+                if (bestScore == 100.0) {
                     return bestMove;
                 }
             }
