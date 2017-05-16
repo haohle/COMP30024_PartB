@@ -294,7 +294,7 @@ public class AgentAlphaBeta extends Agent {
 
 
         if (this.player == 'H') {
-            if (Hscore+(dimension - playerHLoc.size())*dimension > (dimension-((dimension-1)/4.0))*dimension) {
+            if (Hscore+(dimension - playerHLoc.size())*dimension > dimension*(dimension-1)-(((dimension-1)/4.0)*dimension)) {
                 //If pieces are more than 3/4 of the way across the board
                 Hscore += (dimension - playerHLoc.size()) * (dimension+1);
                 //Priority of blocking.
@@ -314,7 +314,7 @@ public class AgentAlphaBeta extends Agent {
             return score_winloss + Hscore - Vscore - penaltypoints;
 
         } else {
-            if (Vscore+(dimension - playerVLoc.size())*dimension > (dimension-((dimension-1)/4.0))*dimension){
+            if (Vscore+(dimension - playerVLoc.size())*dimension > dimension*(dimension-1)-(((dimension-1)/4.0)*dimension)){
                 //If pieces are more than 3/4 of the way across the board
                 Vscore += (dimension - playerVLoc.size()) * (dimension+1);
                 Hscore += (dimension - playerHLoc.size()) * (dimension);
