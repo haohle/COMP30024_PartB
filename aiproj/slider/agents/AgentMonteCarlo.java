@@ -1,3 +1,13 @@
+/* Hao Le - leh2
+ * Sam Chung - chungs1
+ * 
+ * AgentMonteCarlo
+ * Simulates x number of games for the specified moves at the current board state
+ * Returns the probability of that move winning the game if that move is actually made
+ * Last Modified: 17/05/17
+ *
+ */
+
 package aiproj.slider.agents;
 
 import aiproj.slider.Move;
@@ -6,17 +16,9 @@ import aiproj.slider.board.Board;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Created by hao on 15/5/17.
- */
 public class AgentMonteCarlo extends Agent {
-
-    /* Used for random move agent */
-    private Random rng;
-    private Move move;
-
-    private double x = 100;
-    private double wins = 0;
+    private double x = 100;     // number of games to simulate for each move
+    private double wins = 0;    // number of wins with that move
 
     private List<Move> monteMoves;
     private List<Move> hMoves;
@@ -28,30 +30,25 @@ public class AgentMonteCarlo extends Agent {
     private Move bestMove;
     private double bestScore;
 
-    public AgentMonteCarlo() {
+    @Override
+    public Move move() {
+        origBoard = new Board(this.dimension, this.gameBoard.toString().split("\n"));
+        Move tmpMonte = monteMove(this.player, origBoard);
 
+        this.update(tmpMonte);
+        return tmpMonte;
     }
 
-    public void init(int d, Board b, char p) {
-        this.dimension = d;
-        this.player = p;
-
-        /* reads in and generates player's internal board */
-        this.gameBoard = b;
-    }
-
-    public Move getMove(char player, Board b) {
+    private Move monteMove(char player, Board b) {
         this.tempBoard = new Board(this.dimension, b.toString().split("\n"));
+        
         bestMove = null;    // move being returned
         bestScore = 0;
+        wins = 0;
 
         boolean hTurn;
         boolean simulate = true;
         boolean first = true;
-
-        /* for simulation in monte carlo */
-        long seed = System.nanoTime();
-        rng = new Random(seed);
 
         /* identifies who's turn it is */
         if (player == 'H') {
@@ -82,7 +79,6 @@ public class AgentMonteCarlo extends Agent {
                             tempBoard.update(tempBoard, m);
                             first = false;
                         } else {
-                            // simulation
                             hMoves = generateMoves('H', tempBoard);
 
                             // check if no moves possible
@@ -124,7 +120,6 @@ public class AgentMonteCarlo extends Agent {
                             move = vMoves.get(rng.nextInt(vMoves.size()));
 
                             tempBoard.update(tempBoard, move);
-
                         }
 
                         if (tempBoard.getPlayerVLocations().size() == 0) { // no more, game over
@@ -138,6 +133,7 @@ public class AgentMonteCarlo extends Agent {
                     }
                 }
 
+                /* resets the board to the original state */
                 this.tempBoard = new Board(this.dimension, b.toString().split("\n"));
 
                 if (player == 'H') {
@@ -151,13 +147,13 @@ public class AgentMonteCarlo extends Agent {
                 bestScore = (wins/x);
                 bestMove = m;
 
-                if (bestScore == 100.0) {
+                if (bestScore == 0.9) {
+                    wins = 0;
                     return bestMove;
                 }
             }
 
             wins = 0;
-
         }
 
         return bestMove;

@@ -648,7 +648,6 @@ public class AgentChungle extends Agent {
             }
 
             wins = 0;
-
         }
 
         return bestMove;
