@@ -1,9 +1,9 @@
 /* Hao Le - leh2
  * Sam Chung - chungs1
- *
- * Player Class - Not used currently for project A
- *                will probably be needed for project B
- * Last Modified: 07/04/17
+ * 
+ * AgentAlphaBeta
+ * Only makes use of minimax (a-b pruning)
+ * Last Modified: 17/05/17
  *
  */
 
@@ -40,7 +40,7 @@ public class AgentAlphaBeta extends Agent {
         if (this.gameBoard.getPlayerHLocations().size() <= 2 && (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= 5)) {
             depth = 12;
         } else if (this.gameBoard.getPlayerVLocations().size() <= 2 && (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= 5)) {
-//            if here but we have much less pieces than opponent, just use a smaller depth otherwise too risky
+            // if here but we have much less pieces than opponent, just use a smaller depth otherwise too risky
             depth = 10;
         } else if (this.gameBoard.getPlayerHLocations().size() <= (this.dimension/2) || this.gameBoard.getPlayerVLocations().size() <= (this.dimension/2)) {
             // mid game
@@ -197,7 +197,7 @@ public class AgentAlphaBeta extends Agent {
     }
 
     /**
-     * Manhattan distance - used for heuristic evaluation
+     * NOT USED ANYMORE
      * @param x1 end point x
      * @param x0 start point x
      * @param y1 end point y
