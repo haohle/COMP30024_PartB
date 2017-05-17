@@ -20,16 +20,8 @@ import aiproj.slider.agents.helper.MoveManager;
 import aiproj.slider.board.Cell;
 import aiproj.slider.Move;
 
+
 public class AgentAlphaBeta extends Agent {
-
-    private double halfway = (dimension / 2.0);
-    private double prevMaxDistH = Double.POSITIVE_INFINITY;
-    private double prevMaxDistV = Double.POSITIVE_INFINITY;
-    private double prevPiecesH = Double.POSITIVE_INFINITY;
-    private double prevPiecesV = Double.POSITIVE_INFINITY;
-
-    AgentMonteCarlo monte = new AgentMonteCarlo();
-
     /**
      * Dictates the move for the player, this agent makes use of the
      * minimax (with a-b pruning) algorithm
@@ -45,43 +37,25 @@ public class AgentAlphaBeta extends Agent {
 
         int depth; // for minimax search
 
-        if ((this.gameBoard.getPlayerHLocations().size() <= 3 && this.player == 'H') && 
-            (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= 5)) {
-            /* monte carlo (this is used for the end game)
-             * NOTE: Will have to fine tune this or add in a safety guard just to make sure we don't use up all our 
-             *       time evaluating monte carlo
-             */
-            monte.init(this.dimension, this.gameBoard, this.player);
-
-            Move tmpMonte = monte.getMove(this.player, this.gameBoard);
-
-            this.update(tmpMonte);
-            return tmpMonte;
-        } else if ((this.gameBoard.getPlayerVLocations().size() <= 3 && this.player == 'V') && 
-                    (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= 5)) {
-            /* monte carlo (this is used for the end game)
-             * NOTE: Will have to fine tune this or add in a safety guard just to make sure we don't use up all our 
-             *       time evaluating monte carlo
-             */
-            monte.init(this.dimension, this.gameBoard, this.player);
-
-            Move tmpMonte = monte.getMove(this.player, this.gameBoard);
-
-            this.update(tmpMonte);
-            return tmpMonte;
+        if (this.gameBoard.getPlayerHLocations().size() <= 2 && (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= 5)) {
+            depth = 12;
+        } else if (this.gameBoard.getPlayerVLocations().size() <= 2 && (this.gameBoard.getPlayerHLocations().size() + this.gameBoard.getPlayerVLocations().size() <= 5)) {
+//            if here but we have much less pieces than opponent, just use a smaller depth otherwise too risky
+            depth = 10;
         } else if (this.gameBoard.getPlayerHLocations().size() <= (this.dimension/2) || this.gameBoard.getPlayerVLocations().size() <= (this.dimension/2)) {
-            /* mid game */
+            // mid game
             depth = 8;
         } else {
-            /* early game */
-            depth = 4;
+            // while still in early stages of game
+            depth = 8;
         }
 
         /* generates the possible moves the player can make at it's current state */
-        this.possMoves = generateMoves(this.player, this.gameBoard);
-        if (this.player == 'H') {
+        this.possMoves = generateMoves(this.player, gameBoard);
+        if (this.player == 'H'){
             Collections.sort(possMoves, MoveListComparator.HComparator);
-        } else {
+        }
+        else{
             Collections.sort(possMoves, MoveListComparator.VComparator);
         }
 
@@ -111,11 +85,8 @@ public class AgentAlphaBeta extends Agent {
                 break;
             }
         }
-
-        System.out.println(possMoves + " " + bestMove);
         this.update(bestMove.getMove());
         hm.put(gameBoard.toString(),1);
-      
         return bestMove.getMove();
     }
 
@@ -147,7 +118,7 @@ public class AgentAlphaBeta extends Agent {
 
         if (mp) {
             /* generates all possible moves for maximizing player */
-            List<Move> possMoves = generateMoves(this.player, this.gameBoard);
+            List<Move> possMoves = generateMoves(this.player, gameBoard);
             if (this.player == 'H'){
                 Collections.sort(possMoves, MoveListComparator.HComparator);
             }
@@ -185,7 +156,7 @@ public class AgentAlphaBeta extends Agent {
             return maxMove;
         } else {
             /* generates all possible moves for minimizing player */
-            List<Move> oppMoves = generateMoves(this.opponent, this.gameBoard);
+            List<Move> oppMoves = generateMoves(this.opponent, gameBoard);
             if (this.player == 'H'){
                 Collections.sort(oppMoves, MoveListComparator.HComparator);
             }
@@ -204,6 +175,7 @@ public class AgentAlphaBeta extends Agent {
                 /* no bestMove is found yet, assign first to it */
                 tmpMove = minimax(v, d - 1, true, alpha, beta);
                 reverse(v);
+                tmpMove.setScore(tmpMove.getScore());
 
                 if (minMove == null) {
                     minMove = new MoveManager(v, tmpMove.getScore());
@@ -249,12 +221,13 @@ public class AgentAlphaBeta extends Agent {
         ArrayList<Point> playerHLoc = gameBoard.getPlayerHLocations();
         ArrayList<Point> playerVLoc = gameBoard.getPlayerVLocations();
 
+        /* this section handles game winning states */
         if (this.player == 'H') {
-            //Checks the board state is a win or loss
+            // checks the board state is a win or loss
             if (playerHLoc.size() == 0) {
                 score_winloss += 10000;
             }
-            //Encourages the lose with dignity
+            // encourages the lose with dignity
             if (playerVLoc.size() == 0) {
                 score_winloss += -10000;
             }
@@ -272,55 +245,56 @@ public class AgentAlphaBeta extends Agent {
             }
         }
 
+        /* this section encourages the pieces to move away from the start of the board
+         * and occupy more territory in the end of the board
+         */
         for (Point p : playerHLoc) {
             Hscore += p.getX();
             if (player == 'H') {
-                //PenaltyPoints for being on the starting column
-                if ((int) p.getX() == 0) {
-                    penaltypoints += 1;
+                // penaltyPoints for being in the starting third of the board
+                if ((int) p.getX() < ((dimension-1)/3.0)*dimension) {
+                    penaltypoints += ((dimension-1)/3.0)*dimension-p.getX();
                 }
             }
         }
-
         for (Point p : playerVLoc) {
             Vscore += p.getY();
             if (player == 'V') {
-                //PenaltyPoints for being on the starting row
-                if ((int) p.getY() == 0) {
-                    penaltypoints += 1;
+                // penaltyPoints for being in the starting third of the board
+                if ((int) p.getY() < ((dimension-1)/3.0)*dimension) {
+                    penaltypoints += ((dimension-1)/3.0)*dimension-p.getY();
                 }
             }
         }
 
-
+        /* evaluate based on position with a priority on blocking in some cases */
         if (this.player == 'H') {
-            if (Hscore+(dimension - playerHLoc.size())*dimension > dimension*(dimension-1)-(((dimension-1)/4.0)*dimension)) {
-                //If pieces are more than 3/4 of the way across the board
+            if (Hscore+(dimension - playerHLoc.size())*dimension > dimension*(dimension-1)-(((dimension-1)/3.0)*dimension)) {
+                // if pieces are more than 3/4 of the way across the board
                 Hscore += (dimension - playerHLoc.size()) * (dimension+1);
-                //Priority of blocking.
+                // priority of blocking.
                 Vscore += (dimension - playerVLoc.size()) * (dimension);
             }
 
-            else if (Hscore+(dimension - playerHLoc.size())*dimension > ((dimension-1)/2.0)*dimension){
-                //If pieces are more than half way across the board.
+            else if (Hscore+(dimension - playerHLoc.size())*dimension > (((dimension-1)/2.0)-1)*dimension){
+                // if pieces are more than half way across the board.
                 Hscore += (dimension - playerHLoc.size()) * (dimension-1);
                 Vscore += (dimension - playerVLoc.size()) * (dimension+1);
             }
             else {
-                //Starting Play
+                // starting Play
                 Hscore += (dimension - playerHLoc.size()) * (dimension - 1);
                 Vscore += (dimension - playerVLoc.size()) * (dimension + 2);
             }
             return score_winloss + Hscore - Vscore - penaltypoints;
-
         } else {
-            if (Vscore+(dimension - playerVLoc.size())*dimension > dimension*(dimension-1)-(((dimension-1)/4.0)*dimension)){
-                //If pieces are more than 3/4 of the way across the board
+            if (Vscore+(dimension - playerVLoc.size())*dimension > dimension*(dimension-1)-(((dimension-1)/3.0)*dimension)){
+                // if pieces are more than 3/4 of the way across the board
                 Vscore += (dimension - playerVLoc.size()) * (dimension+1);
                 Hscore += (dimension - playerHLoc.size()) * (dimension);
             }
-            if (Vscore+(dimension - playerVLoc.size())*dimension > ((dimension-1)/2.0)*dimension) {
-                //If pieces are more than half way across the board.
+            else if (Vscore+(dimension - playerVLoc.size())*dimension > (((dimension-1)/2.0)-1)*dimension) {
+                // if pieces are more than half way across the board.
                 Vscore += (dimension - playerVLoc.size()) * (dimension-1);
                 Hscore += (dimension - playerHLoc.size()) * (dimension+1);
             } else {
@@ -329,7 +303,6 @@ public class AgentAlphaBeta extends Agent {
             }
             return score_winloss + Vscore - Hscore - penaltypoints;
         }
-
     }
     /**
      * Reverse the original move made by reverting the board state back to what is was before
