@@ -401,7 +401,7 @@ public class AgentChungle extends Agent {
                 Vscore += (dimension - playerVLoc.size()) * (dimension);
             }
 
-            else if (Hscore+(dimension - playerHLoc.size())*dimension > ((dimension-1)/2.0)*dimension){
+            else if (Hscore+(dimension - playerHLoc.size())*dimension > (((dimension-1)/2.0)-1)*dimension){
                 //If pieces are more than half way across the board.
                 Hscore += (dimension - playerHLoc.size()) * (dimension-1);
                 Vscore += (dimension - playerVLoc.size()) * (dimension+1);
@@ -419,7 +419,7 @@ public class AgentChungle extends Agent {
                 Vscore += (dimension - playerVLoc.size()) * (dimension+1);
                 Hscore += (dimension - playerHLoc.size()) * (dimension);
             }
-            if (Vscore+(dimension - playerVLoc.size())*dimension > ((dimension-1)/2.0)*dimension) {
+            else if (Vscore+(dimension - playerVLoc.size())*dimension > (((dimension-1)/2.0)-1)*dimension) {
                 //If pieces are more than half way across the board.
                 Vscore += (dimension - playerVLoc.size()) * (dimension-1);
                 Hscore += (dimension - playerHLoc.size()) * (dimension+1);
