@@ -5,29 +5,40 @@ Sam Chung - chungs1
 Project Part B: Comments
 ============
 
+============
 Structure
-*agent
+============
+#agent#
 **agent (abstract class)
-**agentalphabeta
-**agentrandom (for testing purposes)
+**AgentChungle (used for submission)
+**AgentAlphaBeta (only runs minimax (a-b pruning))
+**AgentMonteCarlo (only runs monte carlo with 1000 simulations per move)
+**AgentRandom (makes random moves)
 
-*board (used to build the player's internal board representation)
-**board
-**cell
-**piece
+#board (used to build the player's internal board representation)#
+**Board
+**Cell
+**Piece
 
-*move
-*referee
-*sliderplayer
+*Move
+*Referee
+*Sliderplayer
 
+============
 3rd Party Java Libraries
+============
 N/A - nothing is used
 
-Describe approach
+============
+Describe approach (of submmited AgentChungle)
+============
 - Search strategy
-    minimax
+    Minimax (depth dependent on the board size) at the early game
+    Minimax (depth dependent on the board size) at the mid game
+    Monte Carlo at the end game
+
 - Evaluation function
-    primarily uses positioning of your players' pieces against the enemy pieces' positioning. It judges how far
+    Primarily uses positioning of your players' pieces against the enemy pieces' positioning. It judges how far
     each players' pieces have progressed on the board and tries to increase our position whilst decreasing theirs.
     Evaluation weighting changes as the game progresses (Halfway point, 3/4 point)
     (this is judged by the positioning of your pieces). It weights the number of finished pieces of each player
@@ -35,20 +46,28 @@ Describe approach
     Punishes pieces progressively, (more when pieces are closer to start)
 
 - Creative techniques
-    - search strategy optimization
+    - Search strategy optimization
         a-b pruning
         varying early, mid and end game stages
             *heuristic weighting and depth of minimax varies depending on the stages
-    - game-specific heuristics
+    - Game-specific heuristics
+
 
     - specialised data structure
-        hashmap - used to ensure a game state is not repeated.
+        Hashmap - used to ensure a game state is not repeated
     - code optimisations
-        sorted possible moves with a strong preference on:
+        Sorted possible moves with a strong preference on:
             moving right then up (for H)
             moving up then right (for V)
             *this helps with a-b pruning to reduce the amount of nodes expanded
         rather than generating new board states for each minimax node, we only use one board
         and update it at each node, then reverse it back to its original state when we backpropagate
-    - search algorithms not discussed in class
-        considered doing monte carlo
+    - Search algorithms not discussed in class
+        Applied monte carlo in the 'End Game' state. This was decided because we are keeping in mind that
+        our heuristic might not be perfect and Monte Carlo would provide a strategy which would not require
+        a strong heuristic.
+
+        HOWEVER, we did notice something really weird for Monte Carlo finishing quite fast even though we run
+        approx. 10000 simulations per move and the game time is like not even close to the time limits.
+        Not sure if this was an error on our part by 'abusing' the time constraints.
+        If it was, PLEASE use AgentAlphaBeta for our submission instead or be really lenient!
