@@ -50,6 +50,10 @@ public class Board implements Cloneable {
         return board;
     }
 
+    /**
+     * Probably silly to have both updateBoard and board.update
+     * But short on time for submission!
+     */
     public void updateBoard(int x, int y, char piece) {
         this.board[x][y] = new Cell(x, y, new Piece(piece));
 
