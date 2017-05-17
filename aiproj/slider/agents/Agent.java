@@ -1,3 +1,11 @@
+/* Hao Le - leh2
+ * Sam Chung - chungs1
+ * 
+ * Agent Abstract Class
+ * Last Modified: 17/05/17
+ *
+ */
+
 package aiproj.slider.agents;
 
 import java.awt.*;
@@ -12,9 +20,6 @@ import aiproj.slider.SliderPlayer;
 import aiproj.slider.board.Board;
 import aiproj.slider.board.Cell;
 
-/**
- * Created by hao on 15/5/17.
- */
 public abstract class Agent implements SliderPlayer {
 
     /* AgentAlphaBeta */
@@ -52,7 +57,7 @@ public abstract class Agent implements SliderPlayer {
             this.opponent = 'V';
         }
 
-        /* for random move agent */
+        /* for agents which make use of random moves */
         long seed = System.nanoTime();
         rng = new Random(seed);
     }
@@ -97,15 +102,15 @@ public abstract class Agent implements SliderPlayer {
 
             }
 
-            /* update the board and make it free at this cell */
-            // TO DO: might not even need this
+            /* update the board and make it free at this cell
+             * might not need this, but better safe than sorry
+             */
             this.gameBoard.getBoard()[move.i][move.j].setBlock(false);
 
             return;
         }
 
         if (to_j == this.dimension) {
-//            System.out.println("HERE " + move.i + " , " + move.j);
             this.gameBoard.getBoard()[move.i][move.j].setPieceTypeChar('+');
 
             /* removes point from ArrayList - used to keep track of pieces */
@@ -117,8 +122,6 @@ public abstract class Agent implements SliderPlayer {
                 }
             }
 
-            /* update the board and make it free at this cell */
-            // TO DO: might not even need this
             this.gameBoard.getBoard()[move.i][move.j].setBlock(false);
 
             return;
@@ -132,7 +135,7 @@ public abstract class Agent implements SliderPlayer {
         this.gameBoard.updateBoard(move.i, move.j, '+');
         this.gameBoard.updateBoard(to_i, to_j, tmpCellChar);
 
-        /* used to update the players memory of where pieces are currently at */
+        /* update the players memory of where pieces are currently at */
         if (tmpCellChar == 'H') {
             for (Iterator<Point> it = this.gameBoard.getPlayerHLocations().iterator(); it.hasNext();) {
                 Point point = it.next();
@@ -156,6 +159,7 @@ public abstract class Agent implements SliderPlayer {
     /**
      * Get the actual surrounding possible moves
      * @param player The player that is getting possible next moves generated
+     * @param board The board which the moves will be based on
      */
     public List<Move> generateMoves(char player, Board b) {
         List<Move> nextMoves = new ArrayList<>();
@@ -215,24 +219,10 @@ public abstract class Agent implements SliderPlayer {
         return nextMoves;
     }
 
-    public void printBoard() {
-        System.out.print("H: ");
-        System.out.println(this.gameBoard.getPlayerHLocations());
-        System.out.print("V: ");
-        System.out.println(this.gameBoard.getPlayerVLocations());
-
-        Cell[][] test = this.gameBoard.getBoard();
-        for (int j = this.dimension - 1; j >= 0; j--) {
-            for (int i = 0; i < this.dimension; i++) {
-                System.out.print(test[i][j].getPieceTypeChar() + " ");
-            }
-            System.out.print("\n");
-        }
-    }
-
     /**
      * Calculate the number of legal moves for player
      * @param player The player that is getting its number of moves calculated
+     * @param board The board which will be used to calculate the number of moves
      */
     public int numLegalMoves(char player, Board board) {
         int num_moves = 0;
@@ -264,6 +254,12 @@ public abstract class Agent implements SliderPlayer {
         return num_moves;
     }
 
+    /**
+     * NO LONGER USED - Was originally implemented for a heuristic strategy which was
+     * scrapped
+     * @param player
+     * @param board
+     */
     public int numBlocks(char player, Board board) {
         int num_blocks = 0;
 
