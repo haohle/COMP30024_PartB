@@ -1,6 +1,6 @@
 /* Hao Le - leh2
  * Sam Chung - chungs1
- * 
+ *
  * AgentMonteCarlo
  * Simulates x number of games for the specified moves at the current board state
  * Returns the probability of that move winning the game if that move is actually made
@@ -14,10 +14,9 @@ import aiproj.slider.Move;
 import aiproj.slider.board.Board;
 
 import java.util.List;
-import java.util.Random;
 
 public class AgentMonteCarlo extends Agent {
-    private double x = 100;     // number of games to simulate for each move
+    private double x = 1000;     // number of games to simulate for each move
     private double wins = 0;    // number of wins with that move
 
     private List<Move> monteMoves;
@@ -41,7 +40,7 @@ public class AgentMonteCarlo extends Agent {
 
     private Move monteMove(char player, Board b) {
         this.tempBoard = new Board(this.dimension, b.toString().split("\n"));
-        
+
         bestMove = null;    // move being returned
         bestScore = 0;
         wins = 0;
