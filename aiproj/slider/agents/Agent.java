@@ -35,7 +35,7 @@ public abstract class Agent implements SliderPlayer {
     /* List of all possible makes the player can make in current state */
     protected List<Move> possMoves;
     protected List<Move> oppMoves;
-    protected HashMap hm = new HashMap();
+    protected HashMap<String, Integer> hm = new HashMap<String, Integer>();
 
     /* Used for random move agent */
     protected Random rng;
@@ -162,7 +162,7 @@ public abstract class Agent implements SliderPlayer {
      * @param board The board which the moves will be based on
      */
     public List<Move> generateMoves(char player, Board b) {
-        List<Move> nextMoves = new ArrayList<>();
+        List<Move> nextMoves = new ArrayList<Move>();
 
         if (player == 'H') {
             for (int i = 0; i < b.getPlayerHLocations().size(); i++) {
