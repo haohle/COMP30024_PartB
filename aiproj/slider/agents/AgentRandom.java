@@ -1,22 +1,20 @@
+/* Hao Le - leh2
+ * Sam Chung - chungs1
+ * 
+ * AgentRandom
+ * Randomly makes a move from the possible moves at the current state
+ * Last Modified: 17/05/17
+ *
+ */
+
 package aiproj.slider.agents;
 
 import java.util.Random;
 
 import aiproj.slider.Move;
 
-/**
- * Created by hao on 15/5/17.
- */
+
 public class AgentRandom extends Agent {
-
-//    /* Used for random move agent */
-//    private Random rng;
-    private Move move;
-
-    public AgentRandom() {
-
-    }
-
     @Override
     public Move move() {
         possMoves = generateMoves(this.player, this.gameBoard);
@@ -26,7 +24,9 @@ public class AgentRandom extends Agent {
             return null;
         }
 
+        /* select a move at random */
         move = possMoves.get(rng.nextInt(possMoves.size()));
+
         this.update(move);
         return move;
     }
