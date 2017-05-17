@@ -1,10 +1,16 @@
+/* Hao Le - leh2
+ * Sam Chung - chungs1
+ * 
+ * MoveManager Class
+ * Used to carry the object of a move with a score
+ * Last Modified: 17/05/17
+ *
+ */
+
 package aiproj.slider.agents.helper;
 
 import aiproj.slider.Move;
 
-/**
- * Created by hao on 12/5/17.
- */
 public class MoveManager {
 
     private Move move;
