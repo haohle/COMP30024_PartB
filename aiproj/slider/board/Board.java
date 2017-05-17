@@ -158,8 +158,6 @@ public class Board implements Cloneable {
 
             }
 
-            /* update the board and make it free at this cell */
-            // TO DO: might not even need this
             b.getBoard()[move.i][move.j].setBlock(false);
 
             return;
@@ -177,8 +175,6 @@ public class Board implements Cloneable {
                 }
             }
 
-            /* update the board and make it free at this cell */
-            // TO DO: might not even need this
             b.getBoard()[move.i][move.j].setBlock(false);
 
             return;
@@ -232,6 +228,7 @@ public class Board implements Cloneable {
 
 
     /**
+     * Test Function
      * Outputs the board provided in the param
      * @param b, Board which is to be printed
      */
